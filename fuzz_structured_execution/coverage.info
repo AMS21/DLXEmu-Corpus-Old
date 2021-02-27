@@ -32,10 +32,10 @@
    31|       |
    32|       |    Processor::Processor()
    33|       |        : m_MemoryBlock(1000u, 1000u)
-   34|  1.88k|    {
-   35|  1.88k|        // Mark R0 as ready only
-   36|  1.88k|        m_IntRegisters.at(0).SetReadOnly(true);
-   37|  1.88k|    }
+   34|  2.75k|    {
+   35|  2.75k|        // Mark R0 as ready only
+   36|  2.75k|        m_IntRegisters.at(0).SetReadOnly(true);
+   37|  2.75k|    }
    38|       |
    39|       |    IntRegister& Processor::GetIntRegister(IntRegisterID id)
    40|      0|    {
@@ -250,85 +250,85 @@
   249|      0|    }
   250|       |
   251|       |    void Processor::ExecuteInstruction(const Instruction& inst)
-  252|      0|    {
-  253|      0|        m_CurrentInstructionAccessType = inst.GetInfo().GetRegisterAccessType();
-  254|      0|
-  255|      0|        inst.Execute(*this);
-  256|      0|    }
+  252|      6|    {
+  253|      6|        m_CurrentInstructionAccessType = inst.GetInfo().GetRegisterAccessType();
+  254|      6|
+  255|      6|        inst.Execute(*this);
+  256|      6|    }
   257|       |
   258|       |    void Processor::LoadProgram(ParsedProgram& programm)
-  259|  1.88k|    {
-  260|  1.88k|        m_CurrentProgram = &programm;
-  261|  1.88k|
-  262|  1.88k|        m_ProgramCounter               = 0u;
-  263|  1.88k|        m_Halted                       = false;
-  264|  1.88k|        m_CurrentInstructionAccessType = RegisterAccessType::Ignored;
-  265|  1.88k|    }
+  259|  2.75k|    {
+  260|  2.75k|        m_CurrentProgram = &programm;
+  261|  2.75k|
+  262|  2.75k|        m_ProgramCounter               = 0u;
+  263|  2.75k|        m_Halted                       = false;
+  264|  2.75k|        m_CurrentInstructionAccessType = RegisterAccessType::Ignored;
+  265|  2.75k|    }
   266|       |
   267|       |    phi::ObserverPtr<ParsedProgram> Processor::GetCurrentProgramm() const noexcept
-  268|      0|    {
-  269|      0|        return m_CurrentProgram;
-  270|      0|    }
+  268|      1|    {
+  269|      1|        return m_CurrentProgram;
+  270|      1|    }
   271|       |
   272|       |    void Processor::ExecuteCurrentProgram()
-  273|  1.88k|    {
-  274|  1.88k|        PHI_ASSERT(m_CurrentProgram);
-  275|  1.88k|
-  276|  1.88k|        // Don't execute a program with parsing errors
-  277|  1.88k|        if (!m_CurrentProgram->m_ParseErrors.empty())
-  278|  1.25k|        {
-  279|  1.25k|            return;
-  280|  1.25k|        }
-  281|    630|
-  282|    630|        m_ProgramCounter      = 0u;
-  283|    630|        m_Halted              = false;
-  284|    630|        m_LastRaisedException = Exception::None;
-  285|    630|
-  286|    630|        phi::usize StepCount{0u};
-  287|    630|
-  288|    630|        while (m_ProgramCounter < m_CurrentProgram->m_Instructions.size() && !m_Halted &&
-  289|    630|               (m_MaxNumberOfSteps != 0u && StepCount < m_MaxNumberOfSteps))
-  290|      0|        {
-  291|      0|            m_NextProgramCounter = m_ProgramCounter + 1u;
-  292|      0|
-  293|      0|            const auto& current_instruction =
-  294|      0|                    m_CurrentProgram->m_Instructions.at(m_ProgramCounter.get());
-  295|      0|            ExecuteInstruction(current_instruction);
-  296|      0|
-  297|      0|            m_ProgramCounter = m_NextProgramCounter;
-  298|      0|
-  299|      0|            ++StepCount;
-  300|      0|        }
-  301|    630|    }
+  273|  2.75k|    {
+  274|  2.75k|        PHI_ASSERT(m_CurrentProgram);
+  275|  2.75k|
+  276|  2.75k|        // Don't execute a program with parsing errors
+  277|  2.75k|        if (!m_CurrentProgram->m_ParseErrors.empty())
+  278|  2.02k|        {
+  279|  2.02k|            return;
+  280|  2.02k|        }
+  281|    727|
+  282|    727|        m_ProgramCounter      = 0u;
+  283|    727|        m_Halted              = false;
+  284|    727|        m_LastRaisedException = Exception::None;
+  285|    727|
+  286|    727|        phi::usize StepCount{0u};
+  287|    727|
+  288|    733|        while (m_ProgramCounter < m_CurrentProgram->m_Instructions.size() && !m_Halted &&
+  289|    733|               (m_MaxNumberOfSteps != 0u && StepCount < m_MaxNumberOfSteps))
+  290|      6|        {
+  291|      6|            m_NextProgramCounter = m_ProgramCounter + 1u;
+  292|      6|
+  293|      6|            const auto& current_instruction =
+  294|      6|                    m_CurrentProgram->m_Instructions.at(m_ProgramCounter.get());
+  295|      6|            ExecuteInstruction(current_instruction);
+  296|      6|
+  297|      6|            m_ProgramCounter = m_NextProgramCounter;
+  298|      6|
+  299|      6|            ++StepCount;
+  300|      6|        }
+  301|    727|    }
   302|       |
   303|       |    void Processor::ClearRegisters()
-  304|  1.88k|    {
-  305|  1.88k|        for (auto& reg : m_IntRegisters)
-  306|  60.2k|        {
-  307|  60.2k|            reg.SetSignedValue(0);
-  308|  60.2k|        }
-  309|  1.88k|
-  310|  1.88k|        for (auto& reg : m_FloatRegisters)
-  311|  60.2k|        {
-  312|  60.2k|            reg.SetValue(0.0f);
-  313|  60.2k|        }
-  314|  1.88k|
-  315|  1.88k|        m_FPSR.SetStatus(false);
-  316|  1.88k|    }
+  304|  2.75k|    {
+  305|  2.75k|        for (auto& reg : m_IntRegisters)
+  306|  88.1k|        {
+  307|  88.1k|            reg.SetSignedValue(0);
+  308|  88.1k|        }
+  309|  2.75k|
+  310|  2.75k|        for (auto& reg : m_FloatRegisters)
+  311|  88.1k|        {
+  312|  88.1k|            reg.SetValue(0.0f);
+  313|  88.1k|        }
+  314|  2.75k|
+  315|  2.75k|        m_FPSR.SetStatus(false);
+  316|  2.75k|    }
   317|       |
   318|       |    void Processor::ClearMemory()
-  319|  1.88k|    {
-  320|  1.88k|        m_MemoryBlock.Clear();
-  321|  1.88k|    }
+  319|  2.75k|    {
+  320|  2.75k|        m_MemoryBlock.Clear();
+  321|  2.75k|    }
   322|       |
   323|       |    void Processor::Raise(Exception exception)
-  324|      0|    {
-  325|      0|        PHI_ASSERT(exception != Exception::None, "Cannot raise None exception");
-  326|      0|
-  327|      0|        m_LastRaisedException = exception;
-  328|      0|
-  329|      0|        switch (exception)
-  330|      0|        {
+  324|      4|    {
+  325|      4|        PHI_ASSERT(exception != Exception::None, "Cannot raise None exception");
+  326|      4|
+  327|      4|        m_LastRaisedException = exception;
+  328|      4|
+  329|      4|        switch (exception)
+  330|      4|        {
   331|      0|            case Exception::None:
   332|      0|                PHI_ASSERT_NOT_REACHED();
   333|      0|                return;
@@ -346,13 +346,13 @@
   345|      0|                m_Halted = true;
   346|      0|                PHI_LOG_ERROR("Trapped");
   347|      0|                return;
-  348|      0|            case Exception::Halt:
-  349|      0|                m_Halted = true;
-  350|      0|                return;
-  351|      0|            case Exception::UnknownLabel:
-  352|      0|                m_Halted = true;
-  353|      0|                PHI_LOG_ERROR("Unknown label");
-  354|      0|                return;
+  348|      3|            case Exception::Halt:
+  349|      3|                m_Halted = true;
+  350|      3|                return;
+  351|      1|            case Exception::UnknownLabel:
+  352|      1|                m_Halted = true;
+  353|      1|                PHI_LOG_ERROR("Unknown label");
+  354|      1|                return;
   355|      0|            case Exception::BadShift:
   356|      0|                PHI_LOG_ERROR("Bad shift");
   357|      0|                return;
@@ -422,22 +422,22 @@
    39|       |                                 {"F30", FloatRegisterID::F30}, {"F31", FloatRegisterID::F31}}};
    40|       |
    41|       |    IntRegisterID StringToIntRegister(std::string_view token)
-   42|  19.1k|    {
-   43|  19.1k|        static constexpr auto map =
-   44|  19.1k|                LookUpMap<std::string_view, IntRegisterID, IntRegisterValues.size()>(
-   45|  19.1k|                        IntRegisterValues, IntRegisterID::None);
-   46|  19.1k|
-   47|  19.1k|        return map.at(token);
-   48|  19.1k|    }
+   42|  64.1k|    {
+   43|  64.1k|        static constexpr auto map =
+   44|  64.1k|                LookUpMap<std::string_view, IntRegisterID, IntRegisterValues.size()>(
+   45|  64.1k|                        IntRegisterValues, IntRegisterID::None);
+   46|  64.1k|
+   47|  64.1k|        return map.at(token);
+   48|  64.1k|    }
    49|       |
    50|       |    FloatRegisterID StringToFloatRegister(std::string_view token)
-   51|  16.2k|    {
-   52|  16.2k|        static constexpr auto map =
-   53|  16.2k|                LookUpMap<std::string_view, FloatRegisterID, FloatRegisterValues.size()>(
-   54|  16.2k|                        FloatRegisterValues, FloatRegisterID::None);
-   55|  16.2k|
-   56|  16.2k|        return map.at(token);
-   57|  16.2k|    }
+   51|  59.3k|    {
+   52|  59.3k|        static constexpr auto map =
+   53|  59.3k|                LookUpMap<std::string_view, FloatRegisterID, FloatRegisterValues.size()>(
+   54|  59.3k|                        FloatRegisterValues, FloatRegisterID::None);
+   55|  59.3k|
+   56|  59.3k|        return map.at(token);
+   57|  59.3k|    }
    58|       |} // namespace dlx
 
 /home/runner/work/DLXEmu/DLXEmu/DLXEmu-App/DLXLib/src/InstructionLibrary.cpp:
@@ -452,409 +452,409 @@
     9|       |{
    10|       |    InstructionLibrary::InstructionLibrary()
    11|       |        : m_Instructions()
-   12|  1.88k|    {
-   13|  1.88k|        PHI_ASSERT(Initialize());
-   14|  1.88k|    }
+   12|  2.75k|    {
+   13|  2.75k|        PHI_ASSERT(Initialize());
+   14|  2.75k|    }
    15|       |
    16|       |    phi::Boolean InstructionLibrary::Initialize()
-   17|  1.88k|    {
-   18|  1.88k|        /* Arithmetic */
-   19|  1.88k|
-   20|  1.88k|        // Addition
-   21|  1.88k|        InitInstruction(OpCode::ADD, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   22|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::ADD);
-   23|  1.88k|        InitInstruction(OpCode::ADDI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   24|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::ADDI);
-   25|  1.88k|        InitInstruction(OpCode::ADDU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   26|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::ADDU);
-   27|  1.88k|        InitInstruction(OpCode::ADDUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   28|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::ADDUI);
-   29|  1.88k|        InitInstruction(OpCode::ADDF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-   30|  1.88k|                        ArgumentType::FloatRegister, RegisterAccessType::Float, impl::ADDF);
-   31|  1.88k|        InitInstruction(OpCode::ADDD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-   32|  1.88k|                        ArgumentType::FloatRegister, RegisterAccessType::Double, impl::ADDD);
-   33|  1.88k|
-   34|  1.88k|        // Subtraction
-   35|  1.88k|        InitInstruction(OpCode::SUB, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   36|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SUB);
-   37|  1.88k|        InitInstruction(OpCode::SUBI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   38|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SUBI);
-   39|  1.88k|        InitInstruction(OpCode::SUBU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   40|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SUBU);
-   41|  1.88k|        InitInstruction(OpCode::SUBUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   42|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SUBUI);
-   43|  1.88k|        InitInstruction(OpCode::SUBF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-   44|  1.88k|                        ArgumentType::FloatRegister, RegisterAccessType::Float, impl::SUBF);
-   45|  1.88k|        InitInstruction(OpCode::SUBD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-   46|  1.88k|                        ArgumentType::FloatRegister, RegisterAccessType::Double, impl::SUBD);
-   47|  1.88k|
-   48|  1.88k|        // Multiplikation
-   49|  1.88k|        InitInstruction(OpCode::MULT, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   50|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::MULT);
-   51|  1.88k|        InitInstruction(OpCode::MULTI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   52|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::MULTI);
-   53|  1.88k|        InitInstruction(OpCode::MULTU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   54|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::MULTU);
-   55|  1.88k|        InitInstruction(OpCode::MULTUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   56|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::MULTUI);
-   57|  1.88k|        InitInstruction(OpCode::MULTF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-   58|  1.88k|                        ArgumentType::FloatRegister, RegisterAccessType::Float, impl::MULTF);
-   59|  1.88k|        InitInstruction(OpCode::MULTD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-   60|  1.88k|                        ArgumentType::FloatRegister, RegisterAccessType::Double, impl::MULTD);
-   61|  1.88k|
-   62|  1.88k|        // Division
-   63|  1.88k|        InitInstruction(OpCode::DIV, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   64|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::DIV);
-   65|  1.88k|        InitInstruction(OpCode::DIVI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   66|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::DIVI);
-   67|  1.88k|        InitInstruction(OpCode::DIVU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   68|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::DIVU);
-   69|  1.88k|        InitInstruction(OpCode::DIVUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   70|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::DIVUI);
-   71|  1.88k|        InitInstruction(OpCode::DIVF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-   72|  1.88k|                        ArgumentType::FloatRegister, RegisterAccessType::Float, impl::DIVF);
-   73|  1.88k|        InitInstruction(OpCode::DIVD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-   74|  1.88k|                        ArgumentType::FloatRegister, RegisterAccessType::Double, impl::DIVD);
-   75|  1.88k|
-   76|  1.88k|        // Shift left logical
-   77|  1.88k|        InitInstruction(OpCode::SLL, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   78|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::SLL);
-   79|  1.88k|        InitInstruction(OpCode::SLLI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   80|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::SLLI);
-   81|  1.88k|
-   82|  1.88k|        // Shift right logical
-   83|  1.88k|        InitInstruction(OpCode::SRL, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   84|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::SRL);
-   85|  1.88k|        InitInstruction(OpCode::SRLI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   86|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::SRLI);
-   87|  1.88k|
-   88|  1.88k|        // Shift left arithmetic
-   89|  1.88k|        InitInstruction(OpCode::SLA, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   90|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::SLA);
-   91|  1.88k|        InitInstruction(OpCode::SLAI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   92|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::SLAI);
-   93|  1.88k|
-   94|  1.88k|        // Shift right arithmetic
-   95|  1.88k|        InitInstruction(OpCode::SRA, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   96|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::SRA);
-   97|  1.88k|        InitInstruction(OpCode::SRAI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-   98|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::SRAI);
-   99|  1.88k|
-  100|  1.88k|        /* Logical */
-  101|  1.88k|
-  102|  1.88k|        // And
-  103|  1.88k|        InitInstruction(OpCode::AND, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  104|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::AND);
-  105|  1.88k|        InitInstruction(OpCode::ANDI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  106|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::ANDI);
-  107|  1.88k|
-  108|  1.88k|        // Or
-  109|  1.88k|        InitInstruction(OpCode::OR, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  110|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::OR);
-  111|  1.88k|        InitInstruction(OpCode::ORI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  112|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::ORI);
-  113|  1.88k|
-  114|  1.88k|        // Xor
-  115|  1.88k|        InitInstruction(OpCode::XOR, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  116|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::XOR);
-  117|  1.88k|        InitInstruction(OpCode::XORI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  118|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::XORI);
-  119|  1.88k|
-  120|  1.88k|        /* Conditionals */
-  121|  1.88k|
-  122|  1.88k|        // Set less than
-  123|  1.88k|        InitInstruction(OpCode::SLT, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  124|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SLT);
-  125|  1.88k|        InitInstruction(OpCode::SLTI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  126|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SLTI);
-  127|  1.88k|        InitInstruction(OpCode::SLTU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  128|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SLTU);
-  129|  1.88k|        InitInstruction(OpCode::SLTUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  130|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SLTUI);
-  131|  1.88k|        InitInstruction(OpCode::LTF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  132|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::LTF);
-  133|  1.88k|        InitInstruction(OpCode::LTD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  134|  1.88k|                        ArgumentType::None, RegisterAccessType::Double, impl::LTD);
-  135|  1.88k|
-  136|  1.88k|        // Set greater than
-  137|  1.88k|        InitInstruction(OpCode::SGT, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  138|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SGT);
-  139|  1.88k|        InitInstruction(OpCode::SGTI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  140|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SGTI);
-  141|  1.88k|        InitInstruction(OpCode::SGTU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  142|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SGTU);
-  143|  1.88k|        InitInstruction(OpCode::SGTUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  144|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SGTUI);
-  145|  1.88k|        InitInstruction(OpCode::GTF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  146|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::GTF);
-  147|  1.88k|        InitInstruction(OpCode::GTD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  148|  1.88k|                        ArgumentType::None, RegisterAccessType::Double, impl::GTD);
-  149|  1.88k|
-  150|  1.88k|        // Set less than or equal
-  151|  1.88k|        InitInstruction(OpCode::SLE, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  152|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SLE);
-  153|  1.88k|        InitInstruction(OpCode::SLEI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  154|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SLEI);
-  155|  1.88k|        InitInstruction(OpCode::SLEU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  156|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SLEU);
-  157|  1.88k|        InitInstruction(OpCode::SLEUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  158|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SLEUI);
-  159|  1.88k|        InitInstruction(OpCode::LEF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  160|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::LEF);
-  161|  1.88k|        InitInstruction(OpCode::LED, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  162|  1.88k|                        ArgumentType::None, RegisterAccessType::Double, impl::LED);
-  163|  1.88k|
-  164|  1.88k|        // Set greater than or equal
-  165|  1.88k|        InitInstruction(OpCode::SGE, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  166|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SGE);
-  167|  1.88k|        InitInstruction(OpCode::SGEI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  168|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SGEI);
-  169|  1.88k|        InitInstruction(OpCode::SGEU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  170|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SGEU);
-  171|  1.88k|        InitInstruction(OpCode::SGEUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  172|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SGEUI);
-  173|  1.88k|        InitInstruction(OpCode::GEF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  174|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::GEF);
-  175|  1.88k|        InitInstruction(OpCode::GED, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  176|  1.88k|                        ArgumentType::None, RegisterAccessType::Double, impl::GED);
-  177|  1.88k|
-  178|  1.88k|        // Set equal
-  179|  1.88k|        InitInstruction(OpCode::SEQ, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  180|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SEQ);
-  181|  1.88k|        InitInstruction(OpCode::SEQI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  182|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SEQI);
-  183|  1.88k|        InitInstruction(OpCode::SEQU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  184|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SEQU);
-  185|  1.88k|        InitInstruction(OpCode::SEQUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  186|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SEQUI);
-  187|  1.88k|        InitInstruction(OpCode::EQF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  188|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::EQF);
-  189|  1.88k|        InitInstruction(OpCode::EQD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  190|  1.88k|                        ArgumentType::None, RegisterAccessType::Double, impl::EQD);
-  191|  1.88k|
-  192|  1.88k|        // Set not equal
-  193|  1.88k|        InitInstruction(OpCode::SNE, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  194|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SNE);
-  195|  1.88k|        InitInstruction(OpCode::SNEI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  196|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SNEI);
-  197|  1.88k|        InitInstruction(OpCode::SNEU, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  198|  1.88k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SNEU);
-  199|  1.88k|        InitInstruction(OpCode::SNEUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
-  200|  1.88k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SNEUI);
-  201|  1.88k|        InitInstruction(OpCode::NEF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  202|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::NEF);
-  203|  1.88k|        InitInstruction(OpCode::NED, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  204|  1.88k|                        ArgumentType::None, RegisterAccessType::Double, impl::NED);
-  205|  1.88k|
-  206|  1.88k|        /* Conditional branching */
-  207|  1.88k|
-  208|  1.88k|        // Branch equal zero
-  209|  1.88k|        InitInstruction(OpCode::BEQZ, ArgumentType::IntRegister, ArgumentType::Label,
-  210|  1.88k|                        ArgumentType::None, RegisterAccessType::Ignored, impl::BEQZ);
-  211|  1.88k|
-  212|  1.88k|        // Branch not equal zero
-  213|  1.88k|        InitInstruction(OpCode::BNEZ, ArgumentType::IntRegister, ArgumentType::Label,
-  214|  1.88k|                        ArgumentType::None, RegisterAccessType::Ignored, impl::BNEZ);
-  215|  1.88k|
-  216|  1.88k|        // Branch floating point true
-  217|  1.88k|        InitInstruction(OpCode::BFPT, ArgumentType::Label, ArgumentType::None, ArgumentType::None,
-  218|  1.88k|                        RegisterAccessType::Ignored, impl::BFPT);
-  219|  1.88k|
-  220|  1.88k|        // Branch floating point false
-  221|  1.88k|        InitInstruction(OpCode::BFPF, ArgumentType::Label, ArgumentType::None, ArgumentType::None,
-  222|  1.88k|                        RegisterAccessType::Ignored, impl::BFPF);
-  223|  1.88k|
-  224|  1.88k|        /* Unconditional branching */
-  225|  1.88k|
-  226|  1.88k|        // Jump
-  227|  1.88k|        InitInstruction(OpCode::J, ArgumentType::Label, ArgumentType::None, ArgumentType::None,
-  228|  1.88k|                        RegisterAccessType::None, impl::J);
-  229|  1.88k|
-  230|  1.88k|        // Jump to register
-  231|  1.88k|        InitInstruction(OpCode::JR, ArgumentType::IntRegister, ArgumentType::None,
-  232|  1.88k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::JR);
-  233|  1.88k|
-  234|  1.88k|        // Jump and link
-  235|  1.88k|        InitInstruction(OpCode::JAL, ArgumentType::Label, ArgumentType::None, ArgumentType::None,
-  236|  1.88k|                        RegisterAccessType::Unsigned, impl::JAL);
-  237|  1.88k|
-  238|  1.88k|        // Jump and link to register
-  239|  1.88k|        InitInstruction(OpCode::JALR, ArgumentType::IntRegister, ArgumentType::None,
-  240|  1.88k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::JALR);
-  241|  1.88k|
-  242|  1.88k|        /* Loading data */
-  243|  1.88k|
-  244|  1.88k|        // Load high immediate
-  245|  1.88k|        InitInstruction(OpCode::LHI, ArgumentType::IntRegister, ArgumentType::ImmediateInteger,
-  246|  1.88k|                        ArgumentType::None, RegisterAccessType::Signed, impl::LHI);
-  247|  1.88k|
-  248|  1.88k|        // Load byte
-  249|  1.88k|        InitInstruction(OpCode::LB, ArgumentType::IntRegister,
-  250|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  251|  1.88k|                        ArgumentType::None, RegisterAccessType::Signed, impl::LB);
-  252|  1.88k|
-  253|  1.88k|        // Load byte unsigned
-  254|  1.88k|        InitInstruction(OpCode::LBU, ArgumentType::IntRegister,
-  255|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  256|  1.88k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::LBU);
-  257|  1.88k|
-  258|  1.88k|        // Load half word
-  259|  1.88k|        InitInstruction(OpCode::LH, ArgumentType::IntRegister,
-  260|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  261|  1.88k|                        ArgumentType::None, RegisterAccessType::Signed, impl::LH);
-  262|  1.88k|
-  263|  1.88k|        // Load half word unsigned
-  264|  1.88k|        InitInstruction(OpCode::LHU, ArgumentType::IntRegister,
-  265|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  266|  1.88k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::LHU);
-  267|  1.88k|
-  268|  1.88k|        // Load word
-  269|  1.88k|        InitInstruction(OpCode::LW, ArgumentType::IntRegister,
-  270|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  271|  1.88k|                        ArgumentType::None, RegisterAccessType::Signed, impl::LW);
-  272|  1.88k|
-  273|  1.88k|        // Load word unsigned
-  274|  1.88k|        InitInstruction(OpCode::LWU, ArgumentType::IntRegister,
-  275|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  276|  1.88k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::LWU);
-  277|  1.88k|
-  278|  1.88k|        // Load float
-  279|  1.88k|        InitInstruction(OpCode::LF, ArgumentType::FloatRegister,
-  280|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  281|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::LF);
-  282|  1.88k|
-  283|  1.88k|        // Load double
-  284|  1.88k|        InitInstruction(OpCode::LD, ArgumentType::FloatRegister,
-  285|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  286|  1.88k|                        ArgumentType::None, RegisterAccessType::Double, impl::LD);
-  287|  1.88k|
-  288|  1.88k|        /* Storing data */
-  289|  1.88k|
-  290|  1.88k|        // Store byte
-  291|  1.88k|        InitInstruction(OpCode::SB,
-  292|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  293|  1.88k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Signed,
-  294|  1.88k|                        impl::SB);
-  295|  1.88k|
-  296|  1.88k|        // Store byte unsigned
-  297|  1.88k|        InitInstruction(OpCode::SBU,
-  298|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  299|  1.88k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Unsigned,
-  300|  1.88k|                        impl::SBU);
-  301|  1.88k|
-  302|  1.88k|        // Store half word
-  303|  1.88k|        InitInstruction(OpCode::SH,
-  304|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  305|  1.88k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Signed,
-  306|  1.88k|                        impl::SH);
-  307|  1.88k|
-  308|  1.88k|        // Store half word unsigned
-  309|  1.88k|        InitInstruction(OpCode::SHU,
-  310|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  311|  1.88k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Unsigned,
-  312|  1.88k|                        impl::SHU);
-  313|  1.88k|
-  314|  1.88k|        // Store word
-  315|  1.88k|        InitInstruction(OpCode::SW,
-  316|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  317|  1.88k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Signed,
-  318|  1.88k|                        impl::SW);
-  319|  1.88k|
-  320|  1.88k|        // Store word unsigned
-  321|  1.88k|        InitInstruction(OpCode::SWU,
-  322|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  323|  1.88k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Unsigned,
-  324|  1.88k|                        impl::SWU);
-  325|  1.88k|
-  326|  1.88k|        // Store float
-  327|  1.88k|        InitInstruction(OpCode::SF,
-  328|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  329|  1.88k|                        ArgumentType::FloatRegister, ArgumentType::None, RegisterAccessType::Float,
-  330|  1.88k|                        impl::SF);
-  331|  1.88k|
-  332|  1.88k|        // Store double
-  333|  1.88k|        InitInstruction(OpCode::SD,
-  334|  1.88k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
-  335|  1.88k|                        ArgumentType::FloatRegister, ArgumentType::None, RegisterAccessType::Double,
-  336|  1.88k|                        impl::SD);
-  337|  1.88k|
-  338|  1.88k|        /* Moving data */
-  339|  1.88k|
-  340|  1.88k|        // Move float
-  341|  1.88k|        InitInstruction(OpCode::MOVF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  342|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::MOVF);
-  343|  1.88k|
-  344|  1.88k|        // Move double
-  345|  1.88k|        InitInstruction(OpCode::MOVD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  346|  1.88k|                        ArgumentType::None, RegisterAccessType::Double, impl::MOVD);
-  347|  1.88k|
-  348|  1.88k|        // Move float to int
-  349|  1.88k|        InitInstruction(OpCode::MOVFP2I, ArgumentType::IntRegister, ArgumentType::FloatRegister,
-  350|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::MOVFP2I);
-  351|  1.88k|
-  352|  1.88k|        // Move int to float
-  353|  1.88k|        InitInstruction(OpCode::MOVI2FP, ArgumentType::FloatRegister, ArgumentType::IntRegister,
-  354|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::MOVI2FP);
-  355|  1.88k|
-  356|  1.88k|        /* Converting data */
-  357|  1.88k|
-  358|  1.88k|        // Convert float to double
-  359|  1.88k|        InitInstruction(OpCode::CVTF2D, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  360|  1.88k|                        ArgumentType::None, RegisterAccessType::MixedFloatDouble, impl::CVTF2D);
-  361|  1.88k|
-  362|  1.88k|        // Convert float to int
-  363|  1.88k|        InitInstruction(OpCode::CVTF2I, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  364|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::CVTF2I);
-  365|  1.88k|
-  366|  1.88k|        // Convert double to float
-  367|  1.88k|        InitInstruction(OpCode::CVTD2F, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  368|  1.88k|                        ArgumentType::None, RegisterAccessType::MixedFloatDouble, impl::CVTD2F);
-  369|  1.88k|
-  370|  1.88k|        // Convert double to int
-  371|  1.88k|        InitInstruction(OpCode::CVTD2I, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  372|  1.88k|                        ArgumentType::None, RegisterAccessType::MixedFloatDouble, impl::CVTD2I);
-  373|  1.88k|
-  374|  1.88k|        // Convert int to float
-  375|  1.88k|        InitInstruction(OpCode::CVTI2F, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  376|  1.88k|                        ArgumentType::None, RegisterAccessType::Float, impl::CVTI2F);
-  377|  1.88k|
-  378|  1.88k|        // Convert int to double
-  379|  1.88k|        InitInstruction(OpCode::CVTI2D, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
-  380|  1.88k|                        ArgumentType::None, RegisterAccessType::MixedFloatDouble, impl::CVTI2D);
-  381|  1.88k|
-  382|  1.88k|        /* Special */
-  383|  1.88k|
-  384|  1.88k|        // Trap
-  385|  1.88k|        InitInstruction(OpCode::TRAP, ArgumentType::ImmediateInteger, ArgumentType::None,
-  386|  1.88k|                        ArgumentType::None, RegisterAccessType::None, impl::TRAP);
-  387|  1.88k|
-  388|  1.88k|        // Halt
-  389|  1.88k|        InitInstruction(OpCode::HALT, ArgumentType::None, ArgumentType::None, ArgumentType::None,
-  390|  1.88k|                        RegisterAccessType::None, impl::HALT);
-  391|  1.88k|
-  392|  1.88k|        // No operation
-  393|  1.88k|        InitInstruction(OpCode::NOP, ArgumentType::None, ArgumentType::None, ArgumentType::None,
-  394|  1.88k|                        RegisterAccessType::None, impl::NOP);
-  395|  1.88k|
-  396|  1.88k|        return true;
-  397|  1.88k|    }
+   17|  2.75k|    {
+   18|  2.75k|        /* Arithmetic */
+   19|  2.75k|
+   20|  2.75k|        // Addition
+   21|  2.75k|        InitInstruction(OpCode::ADD, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   22|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::ADD);
+   23|  2.75k|        InitInstruction(OpCode::ADDI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   24|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::ADDI);
+   25|  2.75k|        InitInstruction(OpCode::ADDU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   26|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::ADDU);
+   27|  2.75k|        InitInstruction(OpCode::ADDUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   28|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::ADDUI);
+   29|  2.75k|        InitInstruction(OpCode::ADDF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+   30|  2.75k|                        ArgumentType::FloatRegister, RegisterAccessType::Float, impl::ADDF);
+   31|  2.75k|        InitInstruction(OpCode::ADDD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+   32|  2.75k|                        ArgumentType::FloatRegister, RegisterAccessType::Double, impl::ADDD);
+   33|  2.75k|
+   34|  2.75k|        // Subtraction
+   35|  2.75k|        InitInstruction(OpCode::SUB, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   36|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SUB);
+   37|  2.75k|        InitInstruction(OpCode::SUBI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   38|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SUBI);
+   39|  2.75k|        InitInstruction(OpCode::SUBU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   40|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SUBU);
+   41|  2.75k|        InitInstruction(OpCode::SUBUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   42|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SUBUI);
+   43|  2.75k|        InitInstruction(OpCode::SUBF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+   44|  2.75k|                        ArgumentType::FloatRegister, RegisterAccessType::Float, impl::SUBF);
+   45|  2.75k|        InitInstruction(OpCode::SUBD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+   46|  2.75k|                        ArgumentType::FloatRegister, RegisterAccessType::Double, impl::SUBD);
+   47|  2.75k|
+   48|  2.75k|        // Multiplikation
+   49|  2.75k|        InitInstruction(OpCode::MULT, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   50|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::MULT);
+   51|  2.75k|        InitInstruction(OpCode::MULTI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   52|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::MULTI);
+   53|  2.75k|        InitInstruction(OpCode::MULTU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   54|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::MULTU);
+   55|  2.75k|        InitInstruction(OpCode::MULTUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   56|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::MULTUI);
+   57|  2.75k|        InitInstruction(OpCode::MULTF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+   58|  2.75k|                        ArgumentType::FloatRegister, RegisterAccessType::Float, impl::MULTF);
+   59|  2.75k|        InitInstruction(OpCode::MULTD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+   60|  2.75k|                        ArgumentType::FloatRegister, RegisterAccessType::Double, impl::MULTD);
+   61|  2.75k|
+   62|  2.75k|        // Division
+   63|  2.75k|        InitInstruction(OpCode::DIV, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   64|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::DIV);
+   65|  2.75k|        InitInstruction(OpCode::DIVI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   66|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::DIVI);
+   67|  2.75k|        InitInstruction(OpCode::DIVU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   68|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::DIVU);
+   69|  2.75k|        InitInstruction(OpCode::DIVUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   70|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::DIVUI);
+   71|  2.75k|        InitInstruction(OpCode::DIVF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+   72|  2.75k|                        ArgumentType::FloatRegister, RegisterAccessType::Float, impl::DIVF);
+   73|  2.75k|        InitInstruction(OpCode::DIVD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+   74|  2.75k|                        ArgumentType::FloatRegister, RegisterAccessType::Double, impl::DIVD);
+   75|  2.75k|
+   76|  2.75k|        // Shift left logical
+   77|  2.75k|        InitInstruction(OpCode::SLL, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   78|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::SLL);
+   79|  2.75k|        InitInstruction(OpCode::SLLI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   80|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::SLLI);
+   81|  2.75k|
+   82|  2.75k|        // Shift right logical
+   83|  2.75k|        InitInstruction(OpCode::SRL, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   84|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::SRL);
+   85|  2.75k|        InitInstruction(OpCode::SRLI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   86|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::SRLI);
+   87|  2.75k|
+   88|  2.75k|        // Shift left arithmetic
+   89|  2.75k|        InitInstruction(OpCode::SLA, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   90|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::SLA);
+   91|  2.75k|        InitInstruction(OpCode::SLAI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   92|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::SLAI);
+   93|  2.75k|
+   94|  2.75k|        // Shift right arithmetic
+   95|  2.75k|        InitInstruction(OpCode::SRA, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   96|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::SRA);
+   97|  2.75k|        InitInstruction(OpCode::SRAI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+   98|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::SRAI);
+   99|  2.75k|
+  100|  2.75k|        /* Logical */
+  101|  2.75k|
+  102|  2.75k|        // And
+  103|  2.75k|        InitInstruction(OpCode::AND, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  104|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::AND);
+  105|  2.75k|        InitInstruction(OpCode::ANDI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  106|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::ANDI);
+  107|  2.75k|
+  108|  2.75k|        // Or
+  109|  2.75k|        InitInstruction(OpCode::OR, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  110|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::OR);
+  111|  2.75k|        InitInstruction(OpCode::ORI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  112|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::ORI);
+  113|  2.75k|
+  114|  2.75k|        // Xor
+  115|  2.75k|        InitInstruction(OpCode::XOR, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  116|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Ignored, impl::XOR);
+  117|  2.75k|        InitInstruction(OpCode::XORI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  118|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Ignored, impl::XORI);
+  119|  2.75k|
+  120|  2.75k|        /* Conditionals */
+  121|  2.75k|
+  122|  2.75k|        // Set less than
+  123|  2.75k|        InitInstruction(OpCode::SLT, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  124|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SLT);
+  125|  2.75k|        InitInstruction(OpCode::SLTI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  126|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SLTI);
+  127|  2.75k|        InitInstruction(OpCode::SLTU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  128|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SLTU);
+  129|  2.75k|        InitInstruction(OpCode::SLTUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  130|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SLTUI);
+  131|  2.75k|        InitInstruction(OpCode::LTF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  132|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::LTF);
+  133|  2.75k|        InitInstruction(OpCode::LTD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  134|  2.75k|                        ArgumentType::None, RegisterAccessType::Double, impl::LTD);
+  135|  2.75k|
+  136|  2.75k|        // Set greater than
+  137|  2.75k|        InitInstruction(OpCode::SGT, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  138|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SGT);
+  139|  2.75k|        InitInstruction(OpCode::SGTI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  140|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SGTI);
+  141|  2.75k|        InitInstruction(OpCode::SGTU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  142|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SGTU);
+  143|  2.75k|        InitInstruction(OpCode::SGTUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  144|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SGTUI);
+  145|  2.75k|        InitInstruction(OpCode::GTF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  146|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::GTF);
+  147|  2.75k|        InitInstruction(OpCode::GTD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  148|  2.75k|                        ArgumentType::None, RegisterAccessType::Double, impl::GTD);
+  149|  2.75k|
+  150|  2.75k|        // Set less than or equal
+  151|  2.75k|        InitInstruction(OpCode::SLE, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  152|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SLE);
+  153|  2.75k|        InitInstruction(OpCode::SLEI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  154|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SLEI);
+  155|  2.75k|        InitInstruction(OpCode::SLEU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  156|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SLEU);
+  157|  2.75k|        InitInstruction(OpCode::SLEUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  158|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SLEUI);
+  159|  2.75k|        InitInstruction(OpCode::LEF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  160|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::LEF);
+  161|  2.75k|        InitInstruction(OpCode::LED, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  162|  2.75k|                        ArgumentType::None, RegisterAccessType::Double, impl::LED);
+  163|  2.75k|
+  164|  2.75k|        // Set greater than or equal
+  165|  2.75k|        InitInstruction(OpCode::SGE, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  166|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SGE);
+  167|  2.75k|        InitInstruction(OpCode::SGEI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  168|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SGEI);
+  169|  2.75k|        InitInstruction(OpCode::SGEU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  170|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SGEU);
+  171|  2.75k|        InitInstruction(OpCode::SGEUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  172|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SGEUI);
+  173|  2.75k|        InitInstruction(OpCode::GEF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  174|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::GEF);
+  175|  2.75k|        InitInstruction(OpCode::GED, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  176|  2.75k|                        ArgumentType::None, RegisterAccessType::Double, impl::GED);
+  177|  2.75k|
+  178|  2.75k|        // Set equal
+  179|  2.75k|        InitInstruction(OpCode::SEQ, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  180|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SEQ);
+  181|  2.75k|        InitInstruction(OpCode::SEQI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  182|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SEQI);
+  183|  2.75k|        InitInstruction(OpCode::SEQU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  184|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SEQU);
+  185|  2.75k|        InitInstruction(OpCode::SEQUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  186|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SEQUI);
+  187|  2.75k|        InitInstruction(OpCode::EQF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  188|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::EQF);
+  189|  2.75k|        InitInstruction(OpCode::EQD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  190|  2.75k|                        ArgumentType::None, RegisterAccessType::Double, impl::EQD);
+  191|  2.75k|
+  192|  2.75k|        // Set not equal
+  193|  2.75k|        InitInstruction(OpCode::SNE, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  194|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Signed, impl::SNE);
+  195|  2.75k|        InitInstruction(OpCode::SNEI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  196|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Signed, impl::SNEI);
+  197|  2.75k|        InitInstruction(OpCode::SNEU, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  198|  2.75k|                        ArgumentType::IntRegister, RegisterAccessType::Unsigned, impl::SNEU);
+  199|  2.75k|        InitInstruction(OpCode::SNEUI, ArgumentType::IntRegister, ArgumentType::IntRegister,
+  200|  2.75k|                        ArgumentType::ImmediateInteger, RegisterAccessType::Unsigned, impl::SNEUI);
+  201|  2.75k|        InitInstruction(OpCode::NEF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  202|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::NEF);
+  203|  2.75k|        InitInstruction(OpCode::NED, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  204|  2.75k|                        ArgumentType::None, RegisterAccessType::Double, impl::NED);
+  205|  2.75k|
+  206|  2.75k|        /* Conditional branching */
+  207|  2.75k|
+  208|  2.75k|        // Branch equal zero
+  209|  2.75k|        InitInstruction(OpCode::BEQZ, ArgumentType::IntRegister, ArgumentType::Label,
+  210|  2.75k|                        ArgumentType::None, RegisterAccessType::Ignored, impl::BEQZ);
+  211|  2.75k|
+  212|  2.75k|        // Branch not equal zero
+  213|  2.75k|        InitInstruction(OpCode::BNEZ, ArgumentType::IntRegister, ArgumentType::Label,
+  214|  2.75k|                        ArgumentType::None, RegisterAccessType::Ignored, impl::BNEZ);
+  215|  2.75k|
+  216|  2.75k|        // Branch floating point true
+  217|  2.75k|        InitInstruction(OpCode::BFPT, ArgumentType::Label, ArgumentType::None, ArgumentType::None,
+  218|  2.75k|                        RegisterAccessType::Ignored, impl::BFPT);
+  219|  2.75k|
+  220|  2.75k|        // Branch floating point false
+  221|  2.75k|        InitInstruction(OpCode::BFPF, ArgumentType::Label, ArgumentType::None, ArgumentType::None,
+  222|  2.75k|                        RegisterAccessType::Ignored, impl::BFPF);
+  223|  2.75k|
+  224|  2.75k|        /* Unconditional branching */
+  225|  2.75k|
+  226|  2.75k|        // Jump
+  227|  2.75k|        InitInstruction(OpCode::J, ArgumentType::Label, ArgumentType::None, ArgumentType::None,
+  228|  2.75k|                        RegisterAccessType::None, impl::J);
+  229|  2.75k|
+  230|  2.75k|        // Jump to register
+  231|  2.75k|        InitInstruction(OpCode::JR, ArgumentType::IntRegister, ArgumentType::None,
+  232|  2.75k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::JR);
+  233|  2.75k|
+  234|  2.75k|        // Jump and link
+  235|  2.75k|        InitInstruction(OpCode::JAL, ArgumentType::Label, ArgumentType::None, ArgumentType::None,
+  236|  2.75k|                        RegisterAccessType::Unsigned, impl::JAL);
+  237|  2.75k|
+  238|  2.75k|        // Jump and link to register
+  239|  2.75k|        InitInstruction(OpCode::JALR, ArgumentType::IntRegister, ArgumentType::None,
+  240|  2.75k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::JALR);
+  241|  2.75k|
+  242|  2.75k|        /* Loading data */
+  243|  2.75k|
+  244|  2.75k|        // Load high immediate
+  245|  2.75k|        InitInstruction(OpCode::LHI, ArgumentType::IntRegister, ArgumentType::ImmediateInteger,
+  246|  2.75k|                        ArgumentType::None, RegisterAccessType::Signed, impl::LHI);
+  247|  2.75k|
+  248|  2.75k|        // Load byte
+  249|  2.75k|        InitInstruction(OpCode::LB, ArgumentType::IntRegister,
+  250|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  251|  2.75k|                        ArgumentType::None, RegisterAccessType::Signed, impl::LB);
+  252|  2.75k|
+  253|  2.75k|        // Load byte unsigned
+  254|  2.75k|        InitInstruction(OpCode::LBU, ArgumentType::IntRegister,
+  255|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  256|  2.75k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::LBU);
+  257|  2.75k|
+  258|  2.75k|        // Load half word
+  259|  2.75k|        InitInstruction(OpCode::LH, ArgumentType::IntRegister,
+  260|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  261|  2.75k|                        ArgumentType::None, RegisterAccessType::Signed, impl::LH);
+  262|  2.75k|
+  263|  2.75k|        // Load half word unsigned
+  264|  2.75k|        InitInstruction(OpCode::LHU, ArgumentType::IntRegister,
+  265|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  266|  2.75k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::LHU);
+  267|  2.75k|
+  268|  2.75k|        // Load word
+  269|  2.75k|        InitInstruction(OpCode::LW, ArgumentType::IntRegister,
+  270|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  271|  2.75k|                        ArgumentType::None, RegisterAccessType::Signed, impl::LW);
+  272|  2.75k|
+  273|  2.75k|        // Load word unsigned
+  274|  2.75k|        InitInstruction(OpCode::LWU, ArgumentType::IntRegister,
+  275|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  276|  2.75k|                        ArgumentType::None, RegisterAccessType::Unsigned, impl::LWU);
+  277|  2.75k|
+  278|  2.75k|        // Load float
+  279|  2.75k|        InitInstruction(OpCode::LF, ArgumentType::FloatRegister,
+  280|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  281|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::LF);
+  282|  2.75k|
+  283|  2.75k|        // Load double
+  284|  2.75k|        InitInstruction(OpCode::LD, ArgumentType::FloatRegister,
+  285|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  286|  2.75k|                        ArgumentType::None, RegisterAccessType::Double, impl::LD);
+  287|  2.75k|
+  288|  2.75k|        /* Storing data */
+  289|  2.75k|
+  290|  2.75k|        // Store byte
+  291|  2.75k|        InitInstruction(OpCode::SB,
+  292|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  293|  2.75k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Signed,
+  294|  2.75k|                        impl::SB);
+  295|  2.75k|
+  296|  2.75k|        // Store byte unsigned
+  297|  2.75k|        InitInstruction(OpCode::SBU,
+  298|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  299|  2.75k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Unsigned,
+  300|  2.75k|                        impl::SBU);
+  301|  2.75k|
+  302|  2.75k|        // Store half word
+  303|  2.75k|        InitInstruction(OpCode::SH,
+  304|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  305|  2.75k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Signed,
+  306|  2.75k|                        impl::SH);
+  307|  2.75k|
+  308|  2.75k|        // Store half word unsigned
+  309|  2.75k|        InitInstruction(OpCode::SHU,
+  310|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  311|  2.75k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Unsigned,
+  312|  2.75k|                        impl::SHU);
+  313|  2.75k|
+  314|  2.75k|        // Store word
+  315|  2.75k|        InitInstruction(OpCode::SW,
+  316|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  317|  2.75k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Signed,
+  318|  2.75k|                        impl::SW);
+  319|  2.75k|
+  320|  2.75k|        // Store word unsigned
+  321|  2.75k|        InitInstruction(OpCode::SWU,
+  322|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  323|  2.75k|                        ArgumentType::IntRegister, ArgumentType::None, RegisterAccessType::Unsigned,
+  324|  2.75k|                        impl::SWU);
+  325|  2.75k|
+  326|  2.75k|        // Store float
+  327|  2.75k|        InitInstruction(OpCode::SF,
+  328|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  329|  2.75k|                        ArgumentType::FloatRegister, ArgumentType::None, RegisterAccessType::Float,
+  330|  2.75k|                        impl::SF);
+  331|  2.75k|
+  332|  2.75k|        // Store double
+  333|  2.75k|        InitInstruction(OpCode::SD,
+  334|  2.75k|                        ArgumentType::ImmediateInteger | ArgumentType::AddressDisplacement,
+  335|  2.75k|                        ArgumentType::FloatRegister, ArgumentType::None, RegisterAccessType::Double,
+  336|  2.75k|                        impl::SD);
+  337|  2.75k|
+  338|  2.75k|        /* Moving data */
+  339|  2.75k|
+  340|  2.75k|        // Move float
+  341|  2.75k|        InitInstruction(OpCode::MOVF, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  342|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::MOVF);
+  343|  2.75k|
+  344|  2.75k|        // Move double
+  345|  2.75k|        InitInstruction(OpCode::MOVD, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  346|  2.75k|                        ArgumentType::None, RegisterAccessType::Double, impl::MOVD);
+  347|  2.75k|
+  348|  2.75k|        // Move float to int
+  349|  2.75k|        InitInstruction(OpCode::MOVFP2I, ArgumentType::IntRegister, ArgumentType::FloatRegister,
+  350|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::MOVFP2I);
+  351|  2.75k|
+  352|  2.75k|        // Move int to float
+  353|  2.75k|        InitInstruction(OpCode::MOVI2FP, ArgumentType::FloatRegister, ArgumentType::IntRegister,
+  354|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::MOVI2FP);
+  355|  2.75k|
+  356|  2.75k|        /* Converting data */
+  357|  2.75k|
+  358|  2.75k|        // Convert float to double
+  359|  2.75k|        InitInstruction(OpCode::CVTF2D, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  360|  2.75k|                        ArgumentType::None, RegisterAccessType::MixedFloatDouble, impl::CVTF2D);
+  361|  2.75k|
+  362|  2.75k|        // Convert float to int
+  363|  2.75k|        InitInstruction(OpCode::CVTF2I, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  364|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::CVTF2I);
+  365|  2.75k|
+  366|  2.75k|        // Convert double to float
+  367|  2.75k|        InitInstruction(OpCode::CVTD2F, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  368|  2.75k|                        ArgumentType::None, RegisterAccessType::MixedFloatDouble, impl::CVTD2F);
+  369|  2.75k|
+  370|  2.75k|        // Convert double to int
+  371|  2.75k|        InitInstruction(OpCode::CVTD2I, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  372|  2.75k|                        ArgumentType::None, RegisterAccessType::MixedFloatDouble, impl::CVTD2I);
+  373|  2.75k|
+  374|  2.75k|        // Convert int to float
+  375|  2.75k|        InitInstruction(OpCode::CVTI2F, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  376|  2.75k|                        ArgumentType::None, RegisterAccessType::Float, impl::CVTI2F);
+  377|  2.75k|
+  378|  2.75k|        // Convert int to double
+  379|  2.75k|        InitInstruction(OpCode::CVTI2D, ArgumentType::FloatRegister, ArgumentType::FloatRegister,
+  380|  2.75k|                        ArgumentType::None, RegisterAccessType::MixedFloatDouble, impl::CVTI2D);
+  381|  2.75k|
+  382|  2.75k|        /* Special */
+  383|  2.75k|
+  384|  2.75k|        // Trap
+  385|  2.75k|        InitInstruction(OpCode::TRAP, ArgumentType::ImmediateInteger, ArgumentType::None,
+  386|  2.75k|                        ArgumentType::None, RegisterAccessType::None, impl::TRAP);
+  387|  2.75k|
+  388|  2.75k|        // Halt
+  389|  2.75k|        InitInstruction(OpCode::HALT, ArgumentType::None, ArgumentType::None, ArgumentType::None,
+  390|  2.75k|                        RegisterAccessType::None, impl::HALT);
+  391|  2.75k|
+  392|  2.75k|        // No operation
+  393|  2.75k|        InitInstruction(OpCode::NOP, ArgumentType::None, ArgumentType::None, ArgumentType::None,
+  394|  2.75k|                        RegisterAccessType::None, impl::NOP);
+  395|  2.75k|
+  396|  2.75k|        return true;
+  397|  2.75k|    }
   398|       |
   399|       |    const InstructionInfo& InstructionLibrary::LookUp(OpCode instruction) const noexcept
-  400|   217k|    {
-  401|   217k|        return m_Instructions.at(static_cast<std::size_t>(instruction));
-  402|   217k|    }
+  400|   336k|    {
+  401|   336k|        return m_Instructions.at(static_cast<std::size_t>(instruction));
+  402|   336k|    }
   403|       |
   404|       |    void InstructionLibrary::InitInstruction(OpCode opcode, ArgumentType arg1, ArgumentType arg2,
   405|       |                                             ArgumentType        arg3,
   406|       |                                             RegisterAccessType  register_access_type,
   407|       |                                             InstructionExecutor executor)
-  408|   210k|    {
-  409|   210k|        PHI_ASSERT(LookUp(opcode).GetExecutor() == nullptr, "Already registered instruction {}",
-  410|   210k|                   magic_enum::enum_name(opcode));
-  411|   210k|
-  412|   210k|        m_Instructions.at(static_cast<std::size_t>(opcode)) =
-  413|   210k|                InstructionInfo(opcode, arg1, arg2, arg3, register_access_type, executor);
-  414|   210k|    }
+  408|   308k|    {
+  409|   308k|        PHI_ASSERT(LookUp(opcode).GetExecutor() == nullptr, "Already registered instruction {}",
+  410|   308k|                   magic_enum::enum_name(opcode));
+  411|   308k|
+  412|   308k|        m_Instructions.at(static_cast<std::size_t>(opcode)) =
+  413|   308k|                InstructionInfo(opcode, arg1, arg2, arg3, register_access_type, executor);
+  414|   308k|    }
   415|       |} // namespace dlx
 
 /home/runner/work/DLXEmu/DLXEmu/DLXEmu-App/DLXLib/src/StatusRegister.cpp:
@@ -863,9 +863,9 @@
     3|       |namespace dlx
     4|       |{
     5|       |    void StatusRegister::SetStatus(phi::Boolean value)
-    6|  1.88k|    {
-    7|  1.88k|        m_Value = value;
-    8|  1.88k|    }
+    6|  2.75k|    {
+    7|  2.75k|        m_Value = value;
+    8|  2.75k|    }
     9|       |
    10|       |    phi::Boolean StatusRegister::Get() const
    11|      0|    {
@@ -881,12 +881,12 @@
     5|       |    IntRegister::IntRegister()
     6|       |        : m_ValueSigned{0}
     7|       |        , m_IsReadOnly{false}
-    8|  60.2k|    {}
+    8|  88.1k|    {}
     9|       |
    10|       |    void IntRegister::SetSignedValue(phi::i32 val)
-   11|  60.2k|    {
-   12|  60.2k|        m_ValueSigned = val;
-   13|  60.2k|    }
+   11|  88.1k|    {
+   12|  88.1k|        m_ValueSigned = val;
+   13|  88.1k|    }
    14|       |
    15|       |    void IntRegister::SetUnsignedValue(phi::u32 val)
    16|      0|    {
@@ -909,9 +909,9 @@
    33|      0|    }
    34|       |
    35|       |    void IntRegister::SetReadOnly(phi::Boolean read_only)
-   36|  1.88k|    {
-   37|  1.88k|        m_IsReadOnly = read_only;
-   38|  1.88k|    }
+   36|  2.75k|    {
+   37|  2.75k|        m_IsReadOnly = read_only;
+   38|  2.75k|    }
    39|       |} // namespace dlx
 
 /home/runner/work/DLXEmu/DLXEmu/DLXEmu-App/DLXLib/src/InstructionInfo.cpp:
@@ -922,11 +922,11 @@
     5|       |    void InstructionInfo::Execute(Processor& processor, const InstructionArg& arg1,
     6|       |                                  const InstructionArg& arg2,
     7|       |                                  const InstructionArg& arg3) const noexcept
-    8|      0|    {
-    9|      0|        PHI_ASSERT(m_Executor, "No execution function defined");
-   10|      0|
-   11|      0|        m_Executor(processor, arg1, arg2, arg3);
-   12|      0|    }
+    8|      6|    {
+    9|      6|        PHI_ASSERT(m_Executor, "No execution function defined");
+   10|      6|
+   11|      6|        m_Executor(processor, arg1, arg2, arg3);
+   12|      6|    }
    13|       |} // namespace dlx
 
 /home/runner/work/DLXEmu/DLXEmu/DLXEmu-App/DLXLib/src/InstructionImplementation.cpp:
@@ -952,18 +952,18 @@
    20|      0|    }
    21|       |
    22|       |    static void JumpToLabel(Processor& processor, std::string_view label_name)
-   23|      0|    {
-   24|      0|        // Lookup the label
-   25|      0|        const phi::ObserverPtr<ParsedProgram> program = processor.GetCurrentProgramm();
-   26|      0|        PHI_ASSERT(program);
-   27|      0|
-   28|      0|        std::string label(label_name.data(), label_name.size());
-   29|      0|        if (program->m_JumpData.find(label) == program->m_JumpData.end())
-   30|      0|        {
-   31|      0|            PHI_LOG_ERROR("Unable to find jump label {}", label_name);
-   32|      0|            processor.Raise(Exception::UnknownLabel);
-   33|      0|            return;
-   34|      0|        }
+   23|      1|    {
+   24|      1|        // Lookup the label
+   25|      1|        const phi::ObserverPtr<ParsedProgram> program = processor.GetCurrentProgramm();
+   26|      1|        PHI_ASSERT(program);
+   27|      1|
+   28|      1|        std::string label(label_name.data(), label_name.size());
+   29|      1|        if (program->m_JumpData.find(label) == program->m_JumpData.end())
+   30|      1|        {
+   31|      1|            PHI_LOG_ERROR("Unable to find jump label {}", label_name);
+   32|      1|            processor.Raise(Exception::UnknownLabel);
+   33|      1|            return;
+   34|      1|        }
    35|      0|
    36|      0|        // Set program counter
    37|      0|        processor.m_NextProgramCounter = program->m_JumpData.at(label);
@@ -2646,15 +2646,15 @@
  1714|       |
  1715|       |        void J(Processor& processor, const InstructionArg& arg1, const InstructionArg& arg2,
  1716|       |               const InstructionArg& arg3)
- 1717|      0|        {
- 1718|      0|            PHI_ASSERT(arg1.GetType() == ArgumentType::Label);
- 1719|      0|            PHI_ASSERT(arg2.GetType() == ArgumentType::None);
- 1720|      0|            PHI_ASSERT(arg3.GetType() == ArgumentType::None);
- 1721|      0|
- 1722|      0|            const auto& jump_label = arg1.AsLabel();
- 1723|      0|
- 1724|      0|            JumpToLabel(processor, jump_label.label_name);
- 1725|      0|        }
+ 1717|      1|        {
+ 1718|      1|            PHI_ASSERT(arg1.GetType() == ArgumentType::Label);
+ 1719|      1|            PHI_ASSERT(arg2.GetType() == ArgumentType::None);
+ 1720|      1|            PHI_ASSERT(arg3.GetType() == ArgumentType::None);
+ 1721|      1|
+ 1722|      1|            const auto& jump_label = arg1.AsLabel();
+ 1723|      1|
+ 1724|      1|            JumpToLabel(processor, jump_label.label_name);
+ 1725|      1|        }
  1726|       |
  1727|       |        void JR(Processor& processor, const InstructionArg& arg1, const InstructionArg& arg2,
  1728|       |                const InstructionArg& arg3)
@@ -3427,23 +3427,23 @@
  2495|       |
  2496|       |        void HALT(Processor& processor, const InstructionArg& arg1, const InstructionArg& arg2,
  2497|       |                  const InstructionArg& arg3)
- 2498|      0|        {
- 2499|      0|            PHI_ASSERT(arg1.GetType() == ArgumentType::None);
- 2500|      0|            PHI_ASSERT(arg2.GetType() == ArgumentType::None);
- 2501|      0|            PHI_ASSERT(arg3.GetType() == ArgumentType::None);
- 2502|      0|
- 2503|      0|            processor.Raise(Exception::Halt);
- 2504|      0|        }
+ 2498|      3|        {
+ 2499|      3|            PHI_ASSERT(arg1.GetType() == ArgumentType::None);
+ 2500|      3|            PHI_ASSERT(arg2.GetType() == ArgumentType::None);
+ 2501|      3|            PHI_ASSERT(arg3.GetType() == ArgumentType::None);
+ 2502|      3|
+ 2503|      3|            processor.Raise(Exception::Halt);
+ 2504|      3|        }
  2505|       |
  2506|       |        void NOP(Processor& processor, const InstructionArg& arg1, const InstructionArg& arg2,
  2507|       |                 const InstructionArg& arg3)
- 2508|      0|        {
- 2509|      0|            PHI_ASSERT(arg1.GetType() == ArgumentType::None);
- 2510|      0|            PHI_ASSERT(arg2.GetType() == ArgumentType::None);
- 2511|      0|            PHI_ASSERT(arg3.GetType() == ArgumentType::None);
- 2512|      0|
- 2513|      0|            /* Do nothing */
- 2514|      0|        }
+ 2508|      2|        {
+ 2509|      2|            PHI_ASSERT(arg1.GetType() == ArgumentType::None);
+ 2510|      2|            PHI_ASSERT(arg2.GetType() == ArgumentType::None);
+ 2511|      2|            PHI_ASSERT(arg3.GetType() == ArgumentType::None);
+ 2512|      2|
+ 2513|      2|            /* Do nothing */
+ 2514|      2|        }
  2515|       |    } // namespace impl
  2516|       |} // namespace dlx
 
@@ -3453,9 +3453,9 @@
     3|       |namespace dlx
     4|       |{
     5|       |    void FloatRegister::SetValue(const phi::f32 val)
-    6|  60.2k|    {
-    7|  60.2k|        m_Value = val;
-    8|  60.2k|    }
+    6|  88.1k|    {
+    7|  88.1k|        m_Value = val;
+    8|  88.1k|    }
     9|       |
    10|       |    phi::f32 FloatRegister::GetValue() const
    11|      0|    {
@@ -3479,17 +3479,17 @@
    13|       |        , m_LineNumber{line_number}
    14|       |        , m_Column{column}
    15|       |        , m_Hint{hint}
-   16|  38.5k|    {}
+   16|  93.3k|    {}
    17|       |
    18|       |    Token::Type Token::GetType() const noexcept
-   19|  51.8k|    {
-   20|  51.8k|        return m_Type;
-   21|  51.8k|    }
+   19|   148k|    {
+   20|   148k|        return m_Type;
+   21|   148k|    }
    22|       |
    23|       |    std::string_view Token::GetTypeName() const noexcept
-   24|  4.77k|    {
-   25|  4.77k|        return magic_enum::enum_name(m_Type);
-   26|  4.77k|    }
+   24|  24.7k|    {
+   25|  24.7k|        return magic_enum::enum_name(m_Type);
+   26|  24.7k|    }
    27|       |
    28|       |    phi::u64 Token::GetLineNumber() const noexcept
    29|      0|    {
@@ -3507,9 +3507,9 @@
    41|      0|    }
    42|       |
    43|       |    std::string_view Token::GetText() const noexcept
-   44|  5.74k|    {
-   45|  5.74k|        return m_Text;
-   46|  5.74k|    }
+   44|  10.1k|    {
+   45|  10.1k|        return m_Text;
+   46|  10.1k|    }
    47|       |
    48|       |    std::string Token::GetTextString() const noexcept
    49|      0|    {
@@ -3517,12 +3517,12 @@
    51|      0|    }
    52|       |
    53|       |    std::uint32_t Token::GetHint() const noexcept
-   54|  7.02k|    {
-   55|  7.02k|        PHI_ASSERT(m_Type == Type::RegisterInt || m_Type == Type::RegisterFloat ||
-   56|  7.02k|                   m_Type == Type::IntegerLiteral || m_Type == Type::OpCode);
-   57|  7.02k|
-   58|  7.02k|        return m_Hint;
-   59|  7.02k|    }
+   54|  28.4k|    {
+   55|  28.4k|        PHI_ASSERT(m_Type == Type::RegisterInt || m_Type == Type::RegisterFloat ||
+   56|  28.4k|                   m_Type == Type::IntegerLiteral || m_Type == Type::OpCode);
+   57|  28.4k|
+   58|  28.4k|        return m_Hint;
+   59|  28.4k|    }
    60|       |
    61|       |    std::string Token::DebugInfo() const noexcept
    62|      0|    {
@@ -3576,9 +3576,9 @@
     7|       |{
     8|       |    MemoryBlock::MemoryBlock(phi::usize start_address, phi::usize starting_size)
     9|       |        : m_StartingAddress(start_address)
-   10|  1.88k|    {
-   11|  1.88k|        m_Values.resize(starting_size.get());
-   12|  1.88k|    }
+   10|  2.75k|    {
+   11|  2.75k|        m_Values.resize(starting_size.get());
+   12|  2.75k|    }
    13|       |
    14|       |    std::optional<phi::i8> MemoryBlock::LoadByte(phi::usize address) const
    15|      0|    {
@@ -3867,12 +3867,12 @@
   298|      0|    }
   299|       |
   300|       |    void MemoryBlock::Clear()
-  301|  1.88k|    {
-  302|  1.88k|        for (auto& val : m_Values)
-  303|  1.88M|        {
-  304|  1.88M|            val.signed_value = 0;
-  305|  1.88M|        }
-  306|  1.88k|    }
+  301|  2.75k|    {
+  302|  2.75k|        for (auto& val : m_Values)
+  303|  2.75M|        {
+  304|  2.75M|            val.signed_value = 0;
+  305|  2.75M|        }
+  306|  2.75k|    }
   307|       |} // namespace dlx
 
 /home/runner/work/DLXEmu/DLXEmu/DLXEmu-App/DLXLib/src/Instruction.cpp:
@@ -3885,27 +3885,27 @@
     7|       |{
     8|       |    Instruction::Instruction(const InstructionInfo& info)
     9|       |        : m_Info(info)
-   10|  6.73k|    {}
+   10|  27.8k|    {}
    11|       |
    12|       |    void Instruction::SetArgument(phi::u8 argument_number, InstructionArg argument)
-   13|    306|    {
-   14|    306|        PHI_ASSERT(argument_number < 3u);
-   15|    306|
-   16|    306|        switch (argument_number.get())
-   17|    306|        {
-   18|    278|            case 0u:
-   19|    278|                m_Arg1 = argument;
-   20|    278|                break;
-   21|     27|            case 1u:
-   22|     27|                m_Arg2 = argument;
-   23|     27|                break;
-   24|      1|            case 2u:
-   25|      1|                m_Arg3 = argument;
-   26|      1|                break;
+   13|    645|    {
+   14|    645|        PHI_ASSERT(argument_number < 3u);
+   15|    645|
+   16|    645|        switch (argument_number.get())
+   17|    645|        {
+   18|    571|            case 0u:
+   19|    571|                m_Arg1 = argument;
+   20|    571|                break;
+   21|     53|            case 1u:
+   22|     53|                m_Arg2 = argument;
+   23|     53|                break;
+   24|     21|            case 2u:
+   25|     21|                m_Arg3 = argument;
+   26|     21|                break;
    27|      0|            default:
    28|      0|                PHI_ASSERT_NOT_REACHED();
-   29|    306|        }
-   30|    306|    }
+   29|    645|        }
+   30|    645|    }
    31|       |
    32|       |    std::string Instruction::DebugInfo() const noexcept
    33|      0|    {
@@ -3913,14 +3913,14 @@
    35|      0|    }
    36|       |
    37|       |    void Instruction::Execute(Processor& processor) const noexcept
-   38|      0|    {
-   39|      0|        m_Info.Execute(processor, m_Arg1, m_Arg2, m_Arg3);
-   40|      0|    }
+   38|      6|    {
+   39|      6|        m_Info.Execute(processor, m_Arg1, m_Arg2, m_Arg3);
+   40|      6|    }
    41|       |
    42|       |    const InstructionInfo& Instruction::GetInfo() const
-   43|      0|    {
-   44|      0|        return m_Info;
-   45|      0|    }
+   43|      6|    {
+   44|      6|        return m_Info;
+   45|      6|    }
    46|       |
    47|       |    const InstructionArg& Instruction::GetArg1() const
    48|      0|    {
@@ -3962,229 +3962,229 @@
    21|       |namespace dlx
    22|       |{
    23|       |    Token ParseToken(std::string_view token, phi::u64 line_number, phi::u64 column)
-   24|  24.8k|    {
-   25|  24.8k|        // TODO: Parse the given number here directly?
-   26|  24.8k|        if (token.at(0) == '#' && token.size() > 1)
-   27|  1.49k|        {
-   28|  1.49k|            return Token(Token::Type::ImmediateInteger, token, line_number, column);
-   29|  1.49k|        }
-   30|  23.3k|
-   31|  23.3k|        if (token.at(0) == '/' || token.at(0) == ';')
-   32|  1.95k|        {
-   33|  1.95k|            return Token(Token::Type::Comment, token, line_number, column);
-   34|  1.95k|        }
-   35|  21.3k|
-   36|  21.3k|        if (auto number = ParseNumber(token); number.has_value())
-   37|    327|        {
-   38|    327|            return Token(Token::Type::IntegerLiteral, token, line_number, column, number->get());
-   39|    327|        }
-   40|  21.0k|
-   41|  21.0k|        std::string token_upper(token.data(), token.size());
-   42|  21.0k|        std::transform(token_upper.begin(), token_upper.end(), token_upper.begin(), ::toupper);
-   43|  21.0k|
-   44|  21.0k|        if (token_upper == "FPSR")
-   45|  1.88k|        {
-   46|  1.88k|            return Token(Token::Type::RegisterStatus, token, line_number, column);
-   47|  1.88k|        }
-   48|  19.1k|
-   49|  19.1k|        if (IntRegisterID id = StringToIntRegister(token_upper); id != IntRegisterID::None)
-   50|  2.90k|        {
-   51|  2.90k|            return Token(Token::Type::RegisterInt, token, line_number, column,
-   52|  2.90k|                         static_cast<std::uint32_t>(id));
-   53|  2.90k|        }
-   54|  16.2k|
-   55|  16.2k|        if (FloatRegisterID id = StringToFloatRegister(token_upper); id != FloatRegisterID::None)
-   56|  1.73k|        {
-   57|  1.73k|            return Token(Token::Type::RegisterFloat, token, line_number, column,
-   58|  1.73k|                         static_cast<std::uint32_t>(id));
-   59|  1.73k|        }
-   60|  14.5k|
-   61|  14.5k|        if (OpCode opcode = StringToOpCode(token_upper); opcode != OpCode::NONE)
-   62|  11.2k|        {
-   63|  11.2k|            return Token(Token::Type::OpCode, token, line_number, column,
-   64|  11.2k|                         static_cast<std::uint32_t>(opcode));
-   65|  11.2k|        }
-   66|  3.26k|
-   67|  3.26k|        return Token(Token::Type::LabelIdentifier, token, line_number, column);
-   68|  3.26k|    }
+   24|  71.7k|    {
+   25|  71.7k|        // TODO: Parse the given number here directly?
+   26|  71.7k|        if (token.at(0) == '#' && token.size() > 1)
+   27|  1.86k|        {
+   28|  1.86k|            return Token(Token::Type::ImmediateInteger, token, line_number, column);
+   29|  1.86k|        }
+   30|  69.9k|
+   31|  69.9k|        if (token.at(0) == '/' || token.at(0) == ';')
+   32|  3.17k|        {
+   33|  3.17k|            return Token(Token::Type::Comment, token, line_number, column);
+   34|  3.17k|        }
+   35|  66.7k|
+   36|  66.7k|        if (auto number = ParseNumber(token); number.has_value())
+   37|    454|        {
+   38|    454|            return Token(Token::Type::IntegerLiteral, token, line_number, column, number->get());
+   39|    454|        }
+   40|  66.2k|
+   41|  66.2k|        std::string token_upper(token.data(), token.size());
+   42|  66.2k|        std::transform(token_upper.begin(), token_upper.end(), token_upper.begin(), ::toupper);
+   43|  66.2k|
+   44|  66.2k|        if (token_upper == "FPSR")
+   45|  2.10k|        {
+   46|  2.10k|            return Token(Token::Type::RegisterStatus, token, line_number, column);
+   47|  2.10k|        }
+   48|  64.1k|
+   49|  64.1k|        if (IntRegisterID id = StringToIntRegister(token_upper); id != IntRegisterID::None)
+   50|  4.87k|        {
+   51|  4.87k|            return Token(Token::Type::RegisterInt, token, line_number, column,
+   52|  4.87k|                         static_cast<std::uint32_t>(id));
+   53|  4.87k|        }
+   54|  59.3k|
+   55|  59.3k|        if (FloatRegisterID id = StringToFloatRegister(token_upper); id != FloatRegisterID::None)
+   56|  2.28k|        {
+   57|  2.28k|            return Token(Token::Type::RegisterFloat, token, line_number, column,
+   58|  2.28k|                         static_cast<std::uint32_t>(id));
+   59|  2.28k|        }
+   60|  57.0k|
+   61|  57.0k|        if (OpCode opcode = StringToOpCode(token_upper); opcode != OpCode::NONE)
+   62|  51.8k|        {
+   63|  51.8k|            return Token(Token::Type::OpCode, token, line_number, column,
+   64|  51.8k|                         static_cast<std::uint32_t>(opcode));
+   65|  51.8k|        }
+   66|  5.15k|
+   67|  5.15k|        return Token(Token::Type::LabelIdentifier, token, line_number, column);
+   68|  5.15k|    }
    69|       |
    70|       |    std::vector<Token> Parser::Tokenize(std::string_view source)
-   71|  1.88k|    {
-   72|  1.88k|        std::vector<Token> tokens{};
-   73|  1.88k|        tokens.reserve(5);
-   74|  1.88k|
-   75|  1.88k|        std::string current_token;
-   76|  1.88k|        current_token.reserve(10);
-   77|  1.88k|
-   78|  1.88k|        phi::u64 current_line_number{1u};
-   79|  1.88k|        phi::u64 current_column{1u};
-   80|  1.88k|        phi::u64 token_begin{0u};
-   81|  1.88k|
-   82|  1.88k|        phi::Boolean parsing_comment{false};
-   83|  1.88k|
-   84|   133k|        for (phi::usize i{0u}; i < source.length(); ++i)
-   85|   132k|        {
-   86|   132k|            const char c{source.at(i.get())};
-   87|   132k|
-   88|   132k|            if (c == '\n')
-   89|  4.30k|            {
-   90|  4.30k|                if (current_token.empty())
-   91|  1.54k|                {
-   92|  1.54k|                    // Skip empty lines
-   93|  1.54k|                    tokens.emplace_back(Token::Type::NewLine, source.substr(token_begin.get(), 1),
-   94|  1.54k|                                        current_line_number, current_column - 1u);
-   95|  1.54k|
-   96|  1.54k|                    parsing_comment = false;
-   97|  1.54k|                    current_line_number += 1u;
-   98|  1.54k|                    current_column = 1u;
-   99|  1.54k|                    continue;
-  100|  1.54k|                }
-  101|  2.76k|
-  102|  2.76k|                // Otherwise a new line separates tokens
-  103|  2.76k|                tokens.emplace_back(
-  104|  2.76k|                        ParseToken(source.substr(token_begin.get(), current_token.length()),
-  105|  2.76k|                                   current_line_number, current_column - current_token.length()));
-  106|  2.76k|
-  107|  2.76k|                token_begin = i;
-  108|  2.76k|
-  109|  2.76k|                tokens.emplace_back(Token::Type::NewLine, source.substr(token_begin.get(), 1),
-  110|  2.76k|                                    current_line_number, current_column - 1u);
-  111|  2.76k|
-  112|  2.76k|                current_token.clear();
-  113|  2.76k|                parsing_comment = false;
-  114|  2.76k|                current_line_number += 1u;
-  115|  2.76k|                current_column = 0u;
-  116|  2.76k|            }
-  117|   127k|            // Comments begin with an '/' or ';' and after that the entire line is treated as part of the comment
-  118|   127k|            else if (c == '/' || c == ';')
-  119|  2.45k|            {
-  120|  2.45k|                if (current_token.empty())
-  121|  1.95k|                {
-  122|  1.95k|                    token_begin = i;
-  123|  1.95k|                }
-  124|  2.45k|
-  125|  2.45k|                parsing_comment = true;
-  126|  2.45k|                current_token.push_back(c);
-  127|  2.45k|            }
-  128|   125k|            else if (parsing_comment)
-  129|  13.8k|            {
-  130|  13.8k|                // simply append the character
-  131|  13.8k|                current_token.push_back(c);
-  132|  13.8k|            }
-  133|   111k|            else
-  134|   111k|            {
-  135|   111k|                // Not parsing a comment
-  136|   111k|
-  137|   111k|                switch (c)
-  138|   111k|                {
-  139|  12.0k|                    case ' ':
-  140|  12.0k|                    case '\t':
-  141|  12.0k|                    case '\v':
-  142|  12.0k|                        if (current_token.empty())
-  143|      3|                        {
-  144|      3|                            current_column += 1u;
-  145|      3|                            // We haven't found any usable character for the current token so just skip the whitespace.
-  146|      3|                            continue;
-  147|      3|                        }
-  148|  12.0k|
-  149|  12.0k|                        // Otherwise a whitespace separates tokens
-  150|  12.0k|                        tokens.emplace_back(ParseToken(
-  151|  12.0k|                                source.substr(token_begin.get(), current_token.length()),
-  152|  12.0k|                                current_line_number, current_column - current_token.length()));
-  153|  12.0k|                        current_token.clear();
-  154|  12.0k|                        break;
-  155|  12.0k|                    case ':':
-  156|    191|                        // Need to parse label names together with their colon
-  157|    191|                        if (!current_token.empty())
-  158|    191|                        {
-  159|    191|                            current_token.push_back(c);
-  160|    191|                            tokens.emplace_back(ParseToken(
-  161|    191|                                    source.substr(token_begin.get(), current_token.length()),
-  162|    191|                                    current_line_number,
-  163|    191|                                    current_column + 1u - current_token.length()));
-  164|    191|
-  165|    191|                            current_token.clear();
-  166|    191|                        }
-  167|      0|                        else
-  168|      0|                        {
-  169|      0|                            // Orphan colon
-  170|      0|                            token_begin = i;
-  171|      0|
-  172|      0|                            tokens.emplace_back(Token::Type::Colon,
-  173|      0|                                                source.substr(token_begin.get(), 1),
-  174|      0|                                                current_line_number, current_column);
-  175|      0|                        }
-  176|    191|                        break;
-  177|  12.0k|                    case ',':
-  178|  9.43k|                    case '(':
-  179|  9.43k|                    case ')':
-  180|  9.43k|                        if (!current_token.empty())
-  181|  9.43k|                        {
-  182|  9.43k|                            tokens.emplace_back(ParseToken(
-  183|  9.43k|                                    source.substr(token_begin.get(), current_token.length()),
-  184|  9.43k|                                    current_line_number, current_column - current_token.length()));
-  185|  9.43k|
-  186|  9.43k|                            current_token.clear();
-  187|  9.43k|                        }
-  188|  9.43k|
-  189|  9.43k|                        Token::Type type;
-  190|  9.43k|                        switch (c)
-  191|  9.43k|                        {
-  192|  9.43k|                            case ',':
-  193|  9.43k|                                type = Token::Type::Comma;
-  194|  9.43k|                                break;
-  195|      1|                            case '(':
-  196|      1|                                type = Token::Type::OpenBracket;
-  197|      1|                                break;
-  198|      2|                            case ')':
-  199|      2|                                type = Token::Type::ClosingBracket;
-  200|      2|                                break;
+   71|  2.75k|    {
+   72|  2.75k|        std::vector<Token> tokens{};
+   73|  2.75k|        tokens.reserve(5);
+   74|  2.75k|
+   75|  2.75k|        std::string current_token;
+   76|  2.75k|        current_token.reserve(10);
+   77|  2.75k|
+   78|  2.75k|        phi::u64 current_line_number{1u};
+   79|  2.75k|        phi::u64 current_column{1u};
+   80|  2.75k|        phi::u64 token_begin{0u};
+   81|  2.75k|
+   82|  2.75k|        phi::Boolean parsing_comment{false};
+   83|  2.75k|
+   84|   355k|        for (phi::usize i{0u}; i < source.length(); ++i)
+   85|   352k|        {
+   86|   352k|            const char c{source.at(i.get())};
+   87|   352k|
+   88|   352k|            if (c == '\n')
+   89|  6.28k|            {
+   90|  6.28k|                if (current_token.empty())
+   91|  2.25k|                {
+   92|  2.25k|                    // Skip empty lines
+   93|  2.25k|                    tokens.emplace_back(Token::Type::NewLine, source.substr(token_begin.get(), 1),
+   94|  2.25k|                                        current_line_number, current_column - 1u);
+   95|  2.25k|
+   96|  2.25k|                    parsing_comment = false;
+   97|  2.25k|                    current_line_number += 1u;
+   98|  2.25k|                    current_column = 1u;
+   99|  2.25k|                    continue;
+  100|  2.25k|                }
+  101|  4.03k|
+  102|  4.03k|                // Otherwise a new line separates tokens
+  103|  4.03k|                tokens.emplace_back(
+  104|  4.03k|                        ParseToken(source.substr(token_begin.get(), current_token.length()),
+  105|  4.03k|                                   current_line_number, current_column - current_token.length()));
+  106|  4.03k|
+  107|  4.03k|                token_begin = i;
+  108|  4.03k|
+  109|  4.03k|                tokens.emplace_back(Token::Type::NewLine, source.substr(token_begin.get(), 1),
+  110|  4.03k|                                    current_line_number, current_column - 1u);
+  111|  4.03k|
+  112|  4.03k|                current_token.clear();
+  113|  4.03k|                parsing_comment = false;
+  114|  4.03k|                current_line_number += 1u;
+  115|  4.03k|                current_column = 0u;
+  116|  4.03k|            }
+  117|   345k|            // Comments begin with an '/' or ';' and after that the entire line is treated as part of the comment
+  118|   345k|            else if (c == '/' || c == ';')
+  119|  3.71k|            {
+  120|  3.71k|                if (current_token.empty())
+  121|  3.17k|                {
+  122|  3.17k|                    token_begin = i;
+  123|  3.17k|                }
+  124|  3.71k|
+  125|  3.71k|                parsing_comment = true;
+  126|  3.71k|                current_token.push_back(c);
+  127|  3.71k|            }
+  128|   342k|            else if (parsing_comment)
+  129|  20.9k|            {
+  130|  20.9k|                // simply append the character
+  131|  20.9k|                current_token.push_back(c);
+  132|  20.9k|            }
+  133|   321k|            else
+  134|   321k|            {
+  135|   321k|                // Not parsing a comment
+  136|   321k|
+  137|   321k|                switch (c)
+  138|   321k|                {
+  139|  50.9k|                    case ' ':
+  140|  50.9k|                    case '\t':
+  141|  50.9k|                    case '\v':
+  142|  50.9k|                        if (current_token.empty())
+  143|      8|                        {
+  144|      8|                            current_column += 1u;
+  145|      8|                            // We haven't found any usable character for the current token so just skip the whitespace.
+  146|      8|                            continue;
+  147|      8|                        }
+  148|  50.9k|
+  149|  50.9k|                        // Otherwise a whitespace separates tokens
+  150|  50.9k|                        tokens.emplace_back(ParseToken(
+  151|  50.9k|                                source.substr(token_begin.get(), current_token.length()),
+  152|  50.9k|                                current_line_number, current_column - current_token.length()));
+  153|  50.9k|                        current_token.clear();
+  154|  50.9k|                        break;
+  155|  50.9k|                    case ':':
+  156|    821|                        // Need to parse label names together with their colon
+  157|    821|                        if (!current_token.empty())
+  158|    820|                        {
+  159|    820|                            current_token.push_back(c);
+  160|    820|                            tokens.emplace_back(ParseToken(
+  161|    820|                                    source.substr(token_begin.get(), current_token.length()),
+  162|    820|                                    current_line_number,
+  163|    820|                                    current_column + 1u - current_token.length()));
+  164|    820|
+  165|    820|                            current_token.clear();
+  166|    820|                        }
+  167|      1|                        else
+  168|      1|                        {
+  169|      1|                            // Orphan colon
+  170|      1|                            token_begin = i;
+  171|      1|
+  172|      1|                            tokens.emplace_back(Token::Type::Colon,
+  173|      1|                                                source.substr(token_begin.get(), 1),
+  174|      1|                                                current_line_number, current_column);
+  175|      1|                        }
+  176|    821|                        break;
+  177|  50.9k|                    case ',':
+  178|  15.2k|                    case '(':
+  179|  15.2k|                    case ')':
+  180|  15.2k|                        if (!current_token.empty())
+  181|  15.2k|                        {
+  182|  15.2k|                            tokens.emplace_back(ParseToken(
+  183|  15.2k|                                    source.substr(token_begin.get(), current_token.length()),
+  184|  15.2k|                                    current_line_number, current_column - current_token.length()));
+  185|  15.2k|
+  186|  15.2k|                            current_token.clear();
+  187|  15.2k|                        }
+  188|  15.2k|
+  189|  15.2k|                        Token::Type type;
+  190|  15.2k|                        switch (c)
+  191|  15.2k|                        {
+  192|  15.2k|                            case ',':
+  193|  15.2k|                                type = Token::Type::Comma;
+  194|  15.2k|                                break;
+  195|      2|                            case '(':
+  196|      2|                                type = Token::Type::OpenBracket;
+  197|      2|                                break;
+  198|      0|                            case ')':
+  199|      0|                                type = Token::Type::ClosingBracket;
+  200|      0|                                break;
   201|      0|                            default:
   202|      0|                                PHI_ASSERT_NOT_REACHED();
   203|      0|                                break;
-  204|  9.43k|                        }
-  205|  9.43k|
-  206|  9.43k|                        token_begin = i;
-  207|  9.43k|
-  208|  9.43k|                        tokens.emplace_back(type, source.substr(token_begin.get(), 1),
-  209|  9.43k|                                            current_line_number, current_column);
-  210|  9.43k|                        break;
-  211|  9.43k|
-  212|  89.7k|                    default:
-  213|  89.7k|                        if (current_token.empty())
-  214|  22.8k|                        {
-  215|  22.8k|                            token_begin = i;
-  216|  22.8k|                        }
-  217|  89.7k|
-  218|  89.7k|                        // simply append the character
-  219|  89.7k|                        current_token.push_back(c);
-  220|   111k|                }
-  221|   111k|            }
-  222|   132k|
-  223|   132k|            current_column += 1u;
-  224|   130k|        }
-  225|  1.88k|
-  226|  1.88k|        // Checked the entire string. Parse whats left if anything
-  227|  1.88k|        if (!current_token.empty())
-  228|    420|        {
-  229|    420|            tokens.emplace_back(ParseToken(source.substr(token_begin.get(), current_token.length()),
-  230|    420|                                           current_line_number,
-  231|    420|                                           current_column - current_token.length()));
-  232|    420|        }
-  233|  1.88k|
-  234|  1.88k|        return tokens;
-  235|  1.88k|    }
+  204|  15.2k|                        }
+  205|  15.2k|
+  206|  15.2k|                        token_begin = i;
+  207|  15.2k|
+  208|  15.2k|                        tokens.emplace_back(type, source.substr(token_begin.get(), 1),
+  209|  15.2k|                                            current_line_number, current_column);
+  210|  15.2k|                        break;
+  211|  15.2k|
+  212|   254k|                    default:
+  213|   254k|                        if (current_token.empty())
+  214|  68.6k|                        {
+  215|  68.6k|                            token_begin = i;
+  216|  68.6k|                        }
+  217|   254k|
+  218|   254k|                        // simply append the character
+  219|   254k|                        current_token.push_back(c);
+  220|   321k|                }
+  221|   321k|            }
+  222|   352k|
+  223|   352k|            current_column += 1u;
+  224|   350k|        }
+  225|  2.75k|
+  226|  2.75k|        // Checked the entire string. Parse whats left if anything
+  227|  2.75k|        if (!current_token.empty())
+  228|    757|        {
+  229|    757|            tokens.emplace_back(ParseToken(source.substr(token_begin.get(), current_token.length()),
+  230|    757|                                           current_line_number,
+  231|    757|                                           current_column - current_token.length()));
+  232|    757|        }
+  233|  2.75k|
+  234|  2.75k|        return tokens;
+  235|  2.75k|    }
   236|       |
   237|       |    static phi::Boolean has_x_more_tokens(const std::vector<Token>& tokens, phi::usize index,
   238|       |                                          phi::u64 x)
-  239|  10.0k|    {
-  240|  10.0k|        return index + x <= tokens.size();
-  241|  10.0k|    }
+  239|  33.7k|    {
+  240|  33.7k|        return index + x <= tokens.size();
+  241|  33.7k|    }
   242|       |
   243|       |    static phi::Boolean has_one_more_token(const std::vector<Token>& tokens, phi::usize index)
-  244|  10.0k|    {
-  245|  10.0k|        return has_x_more_tokens(tokens, index, 1u);
-  246|  10.0k|    }
+  244|  33.7k|    {
+  245|  33.7k|        return has_x_more_tokens(tokens, index, 1u);
+  246|  33.7k|    }
   247|       |
   248|       |    static phi::Boolean next_token_is(const std::vector<Token>& tokens, phi::usize index,
   249|       |                                      Token::Type token_type)
@@ -4208,60 +4208,60 @@
   267|      0|    }
   268|       |
   269|       |    static void AddParseError(ParsedProgram& program, const std::string& message)
-  270|  29.0k|    {
-  271|  29.0k|        ParseError err;
-  272|  29.0k|        err.message = message;
-  273|  29.0k|
-  274|  29.0k|        //PHI_LOG_ERROR("Parsing error: {}", message);
-  275|  29.0k|
-  276|  29.0k|        program.m_ParseErrors.emplace_back(err);
-  277|  29.0k|    }
+  270|  77.8k|    {
+  271|  77.8k|        ParseError err;
+  272|  77.8k|        err.message = message;
+  273|  77.8k|
+  274|  77.8k|        //PHI_LOG_ERROR("Parsing error: {}", message);
+  275|  77.8k|
+  276|  77.8k|        program.m_ParseErrors.emplace_back(err);
+  277|  77.8k|    }
   278|       |
   279|       |    static std::optional<InstructionArg> parse_instruction_argument(
   280|       |            const Token& token, ArgumentType expected_argument_type,
   281|       |            const std::vector<Token>& tokens, phi::usize& index, ParsedProgram& program)
-  282|  6.49k|    {
-  283|  6.49k|        // PHI_LOG_INFO("Parsing argument with token '{}' and expected type '{}'", token.DebugInfo(),
-  284|  6.49k|        //              magic_enum::enum_name(expected_argument_type));
-  285|  6.49k|
-  286|  6.49k|        switch (token.GetType())
-  287|  6.49k|        {
-  288|    108|            case Token::Type::IntegerLiteral: {
-  289|    108|                if (!ArgumentTypeIncludes(expected_argument_type,
-  290|    108|                                          ArgumentType::AddressDisplacement))
-  291|    108|                {
-  292|    108|                    AddParseError(program,
-  293|    108|                                  fmt::format("Expected {} but got address displacement",
-  294|    108|                                              magic_enum::enum_name(expected_argument_type)));
-  295|    108|                    return {};
-  296|    108|                }
-  297|      0|
-  298|      0|                // Parse address displacement
-  299|      0|                auto displacement_value = ParseNumber(token.GetText());
-  300|      0|                if (!displacement_value)
+  282|  27.5k|    {
+  283|  27.5k|        // PHI_LOG_INFO("Parsing argument with token '{}' and expected type '{}'", token.DebugInfo(),
+  284|  27.5k|        //              magic_enum::enum_name(expected_argument_type));
+  285|  27.5k|
+  286|  27.5k|        switch (token.GetType())
+  287|  27.5k|        {
+  288|    195|            case Token::Type::IntegerLiteral: {
+  289|    195|                if (!ArgumentTypeIncludes(expected_argument_type,
+  290|    195|                                          ArgumentType::AddressDisplacement))
+  291|    191|                {
+  292|    191|                    AddParseError(program,
+  293|    191|                                  fmt::format("Expected {} but got address displacement",
+  294|    191|                                              magic_enum::enum_name(expected_argument_type)));
+  295|    191|                    return {};
+  296|    191|                }
+  297|      4|
+  298|      4|                // Parse address displacement
+  299|      4|                auto displacement_value = ParseNumber(token.GetText());
+  300|      4|                if (!displacement_value)
   301|      0|                {
   302|      0|                    AddParseError(program,
   303|      0|                                  "Failed to parse displacement value for Address displacement");
   304|      0|                    return {};
   305|      0|                }
-  306|      0|                std::int16_t value = displacement_value.value().get();
-  307|      0|
-  308|      0|                if (!has_x_more_tokens(tokens, index, 3u))
-  309|      0|                {
-  310|      0|                    AddParseError(program,
-  311|      0|                                  "Not enough arguments left to parse address displacement");
-  312|      0|                    return {};
-  313|      0|                }
-  314|      0|
-  315|      0|                const Token& first_token  = tokens.at(index.get());
-  316|      0|                const Token& second_token = tokens.at((index + 1u).get());
-  317|      0|                const Token& third_token  = tokens.at((index + 2u).get());
-  318|      0|
-  319|      0|                if (first_token.GetType() != Token::Type::OpenBracket)
-  320|      0|                {
-  321|      0|                    AddParseError(program, "Expected open bracket");
-  322|      0|                    return {};
-  323|      0|                }
+  306|      4|                std::int16_t value = displacement_value.value().get();
+  307|      4|
+  308|      4|                if (!has_x_more_tokens(tokens, index, 3u))
+  309|      3|                {
+  310|      3|                    AddParseError(program,
+  311|      3|                                  "Not enough arguments left to parse address displacement");
+  312|      3|                    return {};
+  313|      3|                }
+  314|      1|
+  315|      1|                const Token& first_token  = tokens.at(index.get());
+  316|      1|                const Token& second_token = tokens.at((index + 1u).get());
+  317|      1|                const Token& third_token  = tokens.at((index + 2u).get());
+  318|      1|
+  319|      1|                if (first_token.GetType() != Token::Type::OpenBracket)
+  320|      1|                {
+  321|      1|                    AddParseError(program, "Expected open bracket");
+  322|      1|                    return {};
+  323|      1|                }
   324|      0|
   325|      0|                // Second token is the register
   326|      0|                if (second_token.GetType() != Token::Type::RegisterInt)
@@ -4284,251 +4284,251 @@
   343|      0|                return ConstructInstructionArgAddressDisplacement(
   344|      0|                        static_cast<IntRegisterID>(second_token.GetHint()), value);
   345|      0|            }
-  346|    299|            case Token::Type::RegisterInt: {
-  347|    299|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::IntRegister))
-  348|     63|                {
-  349|     63|                    AddParseError(program,
-  350|     63|                                  fmt::format("Got IntRegister but expected '{}'",
-  351|     63|                                              magic_enum::enum_name(expected_argument_type)));
-  352|     63|                    return {};
-  353|     63|                }
-  354|    236|
-  355|    236|                //PHI_LOG_INFO("Parsed identifier as int register {}",
-  356|    236|                //             magic_enum::enum_name(reg_id));
-  357|    236|
-  358|    236|                return ConstructInstructionArgRegisterInt(
-  359|    236|                        static_cast<IntRegisterID>(token.GetHint()));
-  360|    236|            }
-  361|    256|            case Token::Type::RegisterFloat: {
-  362|    256|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::FloatRegister))
-  363|    200|                {
-  364|    200|                    AddParseError(program,
-  365|    200|                                  fmt::format("Got FloatRegister but expected '{}'",
-  366|    200|                                              magic_enum::enum_name(expected_argument_type)));
-  367|    200|                    return {};
-  368|    200|                }
-  369|     56|
-  370|     56|                //PHI_LOG_INFO("Parsed identifier as float register {}",
-  371|     56|                //             magic_enum::enum_name(float_reg_id));
-  372|     56|
-  373|     56|                return ConstructInstructionArgRegisterFloat(
-  374|     56|                        static_cast<FloatRegisterID>(token.GetHint()));
-  375|     56|            }
-  376|    286|            case Token::Type::RegisterStatus: {
-  377|    286|            }
-  378|    837|            case Token::Type::LabelIdentifier: {
-  379|    837|                // Parse as Label
-  380|    837|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::Label))
-  381|    821|                {
-  382|    821|                    AddParseError(program,
-  383|    821|                                  fmt::format("Got Label but expected '{}'",
-  384|    821|                                              magic_enum::enum_name(expected_argument_type)));
-  385|    821|                    return {};
-  386|    821|                }
-  387|     16|
-  388|     16|                if (!IsValidIdentifier(token.GetText()))
-  389|      4|                {
-  390|      4|                    AddParseError(program, fmt::format("Invalid label identifier found {}",
-  391|      4|                                                       token.GetText()));
-  392|      4|                    return {};
-  393|      4|                }
-  394|     12|
-  395|     12|                //PHI_LOG_INFO("Parsed Label identifier as '{}'", token.GetText());
-  396|     12|
-  397|     12|                return ConstructInstructionArgLabel(token.GetText());
-  398|     12|            }
-  399|    219|            case Token::Type::ImmediateInteger: {
-  400|    219|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::ImmediateInteger))
-  401|    212|                {
-  402|    212|                    AddParseError(program,
-  403|    212|                                  fmt::format("Got ImmediateInteger but expected '{}'",
-  404|    212|                                              magic_enum::enum_name(expected_argument_type)));
-  405|    212|                    return {};
-  406|    212|                }
-  407|      7|
-  408|      7|                auto parsed_value = ParseNumber(token.GetText().substr(1));
-  409|      7|                if (!parsed_value)
-  410|      5|                {
-  411|      5|                    AddParseError(program, "Failed to parse immediate Integer value");
-  412|      5|                    return {};
-  413|      5|                }
+  346|    665|            case Token::Type::RegisterInt: {
+  347|    665|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::IntRegister))
+  348|     96|                {
+  349|     96|                    AddParseError(program,
+  350|     96|                                  fmt::format("Got IntRegister but expected '{}'",
+  351|     96|                                              magic_enum::enum_name(expected_argument_type)));
+  352|     96|                    return {};
+  353|     96|                }
+  354|    569|
+  355|    569|                //PHI_LOG_INFO("Parsed identifier as int register {}",
+  356|    569|                //             magic_enum::enum_name(reg_id));
+  357|    569|
+  358|    569|                return ConstructInstructionArgRegisterInt(
+  359|    569|                        static_cast<IntRegisterID>(token.GetHint()));
+  360|    569|            }
+  361|    569|            case Token::Type::RegisterFloat: {
+  362|    383|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::FloatRegister))
+  363|    326|                {
+  364|    326|                    AddParseError(program,
+  365|    326|                                  fmt::format("Got FloatRegister but expected '{}'",
+  366|    326|                                              magic_enum::enum_name(expected_argument_type)));
+  367|    326|                    return {};
+  368|    326|                }
+  369|     57|
+  370|     57|                //PHI_LOG_INFO("Parsed identifier as float register {}",
+  371|     57|                //             magic_enum::enum_name(float_reg_id));
+  372|     57|
+  373|     57|                return ConstructInstructionArgRegisterFloat(
+  374|     57|                        static_cast<FloatRegisterID>(token.GetHint()));
+  375|     57|            }
+  376|    273|            case Token::Type::RegisterStatus: {
+  377|    273|            }
+  378|  1.14k|            case Token::Type::LabelIdentifier: {
+  379|  1.14k|                // Parse as Label
+  380|  1.14k|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::Label))
+  381|  1.10k|                {
+  382|  1.10k|                    AddParseError(program,
+  383|  1.10k|                                  fmt::format("Got Label but expected '{}'",
+  384|  1.10k|                                              magic_enum::enum_name(expected_argument_type)));
+  385|  1.10k|                    return {};
+  386|  1.10k|                }
+  387|     36|
+  388|     36|                if (!IsValidIdentifier(token.GetText()))
+  389|     19|                {
+  390|     19|                    AddParseError(program, fmt::format("Invalid label identifier found {}",
+  391|     19|                                                       token.GetText()));
+  392|     19|                    return {};
+  393|     19|                }
+  394|     17|
+  395|     17|                //PHI_LOG_INFO("Parsed Label identifier as '{}'", token.GetText());
+  396|     17|
+  397|     17|                return ConstructInstructionArgLabel(token.GetText());
+  398|     17|            }
+  399|    386|            case Token::Type::ImmediateInteger: {
+  400|    386|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::ImmediateInteger))
+  401|    256|                {
+  402|    256|                    AddParseError(program,
+  403|    256|                                  fmt::format("Got ImmediateInteger but expected '{}'",
+  404|    256|                                              magic_enum::enum_name(expected_argument_type)));
+  405|    256|                    return {};
+  406|    256|                }
+  407|    130|
+  408|    130|                auto parsed_value = ParseNumber(token.GetText().substr(1));
+  409|    130|                if (!parsed_value)
+  410|    128|                {
+  411|    128|                    AddParseError(program, "Failed to parse immediate Integer value");
+  412|    128|                    return {};
+  413|    128|                }
   414|      2|
   415|      2|                //PHI_LOG_INFO("Parsed Immediate Integer with value {}", parsed_value.value().get());
   416|      2|
   417|      2|                return ConstructInstructionArgImmediateValue(parsed_value.value().get());
   418|      2|            }
-  419|  4.77k|            default:
-  420|  4.77k|                AddParseError(program,
-  421|  4.77k|                              fmt::format("Unexpected token of type '{}'", token.GetTypeName()));
-  422|  4.77k|                return {};
-  423|  6.49k|        }
-  424|  6.49k|    }
+  419|  24.7k|            default:
+  420|  24.7k|                AddParseError(program,
+  421|  24.7k|                              fmt::format("Unexpected token of type '{}'", token.GetTypeName()));
+  422|  24.7k|                return {};
+  423|  27.5k|        }
+  424|  27.5k|    }
   425|       |
   426|       |    static void consume_x_tokens(phi::usize& index, phi::usize x)
-  427|  38.5k|    {
-  428|  38.5k|        index += x;
-  429|  38.5k|    }
+  427|  93.3k|    {
+  428|  93.3k|        index += x;
+  429|  93.3k|    }
   430|       |
   431|       |    static void consume_current_token(phi::usize& index)
-  432|  38.5k|    {
-  433|  38.5k|        consume_x_tokens(index, 1u);
-  434|  38.5k|    }
+  432|  93.3k|    {
+  433|  93.3k|        consume_x_tokens(index, 1u);
+  434|  93.3k|    }
   435|       |
   436|       |    ParsedProgram Parser::Parse(const InstructionLibrary& lib, std::vector<Token>& tokens)
-  437|  1.88k|    {
-  438|  1.88k|        ParsedProgram program;
-  439|  1.88k|
-  440|  1.88k|        program.m_Tokens = tokens;
-  441|  1.88k|
-  442|  1.88k|        phi::Boolean line_has_instruction{false};
-  443|  1.88k|
-  444|  30.6k|        for (phi::usize index{0u}; index < tokens.size();)
-  445|  28.7k|        {
-  446|  28.7k|            Token& current_token = tokens.at(index.get());
-  447|  28.7k|
-  448|  28.7k|            consume_current_token(index);
-  449|  28.7k|
-  450|  28.7k|            //PHI_LOG_INFO("Parsing '{}'", current_token.DebugInfo());
-  451|  28.7k|
-  452|  28.7k|            switch (current_token.GetType())
-  453|  28.7k|            {
+  437|  2.75k|    {
+  438|  2.75k|        ParsedProgram program;
+  439|  2.75k|
+  440|  2.75k|        program.m_Tokens = tokens;
+  441|  2.75k|
+  442|  2.75k|        phi::Boolean line_has_instruction{false};
+  443|  2.75k|
+  444|  62.7k|        for (phi::usize index{0u}; index < tokens.size();)
+  445|  60.0k|        {
+  446|  60.0k|            Token& current_token = tokens.at(index.get());
+  447|  60.0k|
+  448|  60.0k|            consume_current_token(index);
+  449|  60.0k|
+  450|  60.0k|            //PHI_LOG_INFO("Parsing '{}'", current_token.DebugInfo());
+  451|  60.0k|
+  452|  60.0k|            switch (current_token.GetType())
+  453|  60.0k|            {
   454|      0|                // Ignore comments
-  455|  1.71k|                case Token::Type::Comment:
-  456|  1.71k|                    //PHI_LOG_DEBUG("Ignoring comment");
-  457|  1.71k|                    break;
-  458|  4.04k|                case Token::Type::NewLine:
-  459|  4.04k|                    //PHI_LOG_DEBUG("Ignoring newline");
-  460|  4.04k|                    line_has_instruction = false;
-  461|  4.04k|                    break;
-  462|  2.71k|                case Token::Type::LabelIdentifier: {
-  463|  2.71k|                    if (line_has_instruction)
+  455|  2.44k|                case Token::Type::Comment:
+  456|  2.44k|                    //PHI_LOG_DEBUG("Ignoring comment");
+  457|  2.44k|                    break;
+  458|  5.83k|                case Token::Type::NewLine:
+  459|  5.83k|                    //PHI_LOG_DEBUG("Ignoring newline");
+  460|  5.83k|                    line_has_instruction = false;
+  461|  5.83k|                    break;
+  462|  4.28k|                case Token::Type::LabelIdentifier: {
+  463|  4.28k|                    if (line_has_instruction)
   464|      0|                    {
   465|      0|                        AddParseError(program, "Expected new line but got label identifer");
   466|      0|                        break;
   467|      0|                    }
-  468|  2.71k|
-  469|  2.71k|                    // Handle jump labels
-  470|  2.71k|                    // Check if the last character of the identifier is a colon
-  471|  2.71k|                    if (current_token.GetText().at(current_token.GetText().size() - 1) == ':')
-  472|    142|                    {
-  473|    142|                        std::string_view label_name = current_token.GetText().substr(
-  474|    142|                                0, current_token.GetText().size() - 1);
-  475|    142|
-  476|    142|                        program.m_JumpData[label_name] =
-  477|    142|                                static_cast<std::uint32_t>(program.m_Instructions.size());
-  478|    142|
-  479|    142|                        //PHI_LOG_INFO("Added jump label {} -> {}", label_name,
-  480|    142|                        //             program.m_Instructions.size());
-  481|    142|                    }
-  482|  2.57k|                    else
-  483|  2.57k|                    {
-  484|  2.57k|                        AddParseError(program, "Label identifier is missing a colon");
-  485|  2.57k|                    }
-  486|  2.71k|
-  487|  2.71k|                    break;
-  488|  2.71k|                }
-  489|  6.73k|                case Token::Type::OpCode: {
-  490|  6.73k|                    if (line_has_instruction)
-  491|      0|                    {
-  492|      0|                        AddParseError(program, "Expected new line but got op code");
-  493|      0|                        break;
-  494|      0|                    }
-  495|  6.73k|
-  496|  6.73k|                    // Handle normal instructions
-  497|  6.73k|                    OpCode opcode = static_cast<OpCode>(current_token.GetHint());
-  498|  6.73k|
-  499|  6.73k|                    //PHI_LOG_INFO("Instruction opcode: {}", magic_enum::enum_name(opcode));
-  500|  6.73k|
-  501|  6.73k|                    const InstructionInfo& info = lib.LookUp(opcode);
-  502|  6.73k|
-  503|  6.73k|                    // Make sure we got no problems here
-  504|  6.73k|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
-  505|  6.73k|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
-  506|  6.73k|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
-  507|  6.73k|                    PHI_ASSERT(info.GetExecutor());
-  508|  6.73k|
-  509|  6.73k|                    phi::u8 number_of_argument_required = info.GetNumberOfRequiredArguments();
-  510|  6.73k|                    //PHI_LOG_INFO("Instruction requires {} arguments",
-  511|  6.73k|                    //             number_of_argument_required.get());
-  512|  6.73k|
-  513|  6.73k|                    // Create instruction
-  514|  6.73k|                    Instruction instruction(info);
-  515|  6.73k|
-  516|  6.73k|                    // Parse arguments
-  517|  10.0k|                    for (phi::u8 argument_num{0_u8}; argument_num < number_of_argument_required;)
-  518|  10.0k|                    {
-  519|  10.0k|                        // Get next token
-  520|  10.0k|                        if (!has_one_more_token(tokens, index))
-  521|    236|                        {
-  522|    236|                            AddParseError(
-  523|    236|                                    program,
-  524|    236|                                    fmt::format("Missing {} arguments for instruction {}",
-  525|    236|                                                (number_of_argument_required - argument_num).get(),
-  526|    236|                                                magic_enum::enum_name(opcode)));
-  527|    236|                            break;
-  528|    236|                        }
-  529|  9.80k|
-  530|  9.80k|                        current_token = tokens.at(index.get());
-  531|  9.80k|                        consume_current_token(index);
-  532|  9.80k|
-  533|  9.80k|                        // Skip commas
-  534|  9.80k|                        if (current_token.GetType() == Token::Type::Comma)
-  535|  3.04k|                        {
-  536|  3.04k|                            //PHI_LOG_DEBUG("Skipping comma");
-  537|  3.04k|                            continue;
-  538|  3.04k|                        }
-  539|  6.76k|
-  540|  6.76k|                        if (current_token.GetType() == Token::Type::NewLine)
-  541|    267|                        {
-  542|    267|                            AddParseError(program, "Unexpected end of line");
-  543|    267|                            break;
-  544|    267|                        }
-  545|  6.49k|
-  546|  6.49k|                        std::optional<InstructionArg> optional_parsed_argument =
-  547|  6.49k|                                parse_instruction_argument(current_token,
-  548|  6.49k|                                                           info.GetArgumentType(argument_num),
-  549|  6.49k|                                                           tokens, index, program);
-  550|  6.49k|                        if (!optional_parsed_argument.has_value())
-  551|  6.19k|                        {
-  552|  6.19k|                            AddParseError(program, fmt::format("Failed to parse argument number {}",
-  553|  6.19k|                                                               argument_num.get()));
-  554|  6.19k|                            break;
-  555|  6.19k|                        }
-  556|    306|
-  557|    306|                        // Successfully parsed one argument
-  558|    306|                        InstructionArg parsed_argument = optional_parsed_argument.value();
-  559|    306|
-  560|    306|                        instruction.SetArgument(argument_num, parsed_argument);
-  561|    306|                        argument_num++;
-  562|    306|
-  563|    306|                        //PHI_LOG_INFO("Successfully parsed argument {}", argument_num.get());
-  564|    306|                    }
-  565|  6.73k|
-  566|  6.73k|                    // Only add the instruction if we got no parsing errors
-  567|  6.73k|                    if (program.m_ParseErrors.empty())
-  568|      0|                    {
-  569|      0|                        //PHI_LOG_INFO("Successfully parsed instruction '{}'",
-  570|      0|                        //            instruction.DebugInfo());
-  571|      0|                        program.m_Instructions.emplace_back(instruction);
-  572|      0|                        line_has_instruction = true;
-  573|      0|                    }
-  574|  6.73k|                    break;
-  575|  6.73k|                }
-  576|  6.73k|
-  577|  13.5k|                default:
-  578|  13.5k|                    AddParseError(program, "Unexpected token");
-  579|  13.5k|                    break;
-  580|  28.7k|            }
-  581|  28.7k|        }
-  582|  1.88k|
-  583|  1.88k|        return program;
-  584|  1.88k|    }
+  468|  4.28k|
+  469|  4.28k|                    // Handle jump labels
+  470|  4.28k|                    // Check if the last character of the identifier is a colon
+  471|  4.28k|                    if (current_token.GetText().at(current_token.GetText().size() - 1) == ':')
+  472|    708|                    {
+  473|    708|                        std::string_view label_name = current_token.GetText().substr(
+  474|    708|                                0, current_token.GetText().size() - 1);
+  475|    708|
+  476|    708|                        program.m_JumpData[label_name] =
+  477|    708|                                static_cast<std::uint32_t>(program.m_Instructions.size());
+  478|    708|
+  479|    708|                        //PHI_LOG_INFO("Added jump label {} -> {}", label_name,
+  480|    708|                        //             program.m_Instructions.size());
+  481|    708|                    }
+  482|  3.58k|                    else
+  483|  3.58k|                    {
+  484|  3.58k|                        AddParseError(program, "Label identifier is missing a colon");
+  485|  3.58k|                    }
+  486|  4.28k|
+  487|  4.28k|                    break;
+  488|  4.28k|                }
+  489|  27.8k|                case Token::Type::OpCode: {
+  490|  27.8k|                    if (line_has_instruction)
+  491|      1|                    {
+  492|      1|                        AddParseError(program, "Expected new line but got op code");
+  493|      1|                        break;
+  494|      1|                    }
+  495|  27.8k|
+  496|  27.8k|                    // Handle normal instructions
+  497|  27.8k|                    OpCode opcode = static_cast<OpCode>(current_token.GetHint());
+  498|  27.8k|
+  499|  27.8k|                    //PHI_LOG_INFO("Instruction opcode: {}", magic_enum::enum_name(opcode));
+  500|  27.8k|
+  501|  27.8k|                    const InstructionInfo& info = lib.LookUp(opcode);
+  502|  27.8k|
+  503|  27.8k|                    // Make sure we got no problems here
+  504|  27.8k|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
+  505|  27.8k|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
+  506|  27.8k|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
+  507|  27.8k|                    PHI_ASSERT(info.GetExecutor());
+  508|  27.8k|
+  509|  27.8k|                    phi::u8 number_of_argument_required = info.GetNumberOfRequiredArguments();
+  510|  27.8k|                    //PHI_LOG_INFO("Instruction requires {} arguments",
+  511|  27.8k|                    //             number_of_argument_required.get());
+  512|  27.8k|
+  513|  27.8k|                    // Create instruction
+  514|  27.8k|                    Instruction instruction(info);
+  515|  27.8k|
+  516|  27.8k|                    // Parse arguments
+  517|  33.8k|                    for (phi::u8 argument_num{0_u8}; argument_num < number_of_argument_required;)
+  518|  33.7k|                    {
+  519|  33.7k|                        // Get next token
+  520|  33.7k|                        if (!has_one_more_token(tokens, index))
+  521|    444|                        {
+  522|    444|                            AddParseError(
+  523|    444|                                    program,
+  524|    444|                                    fmt::format("Missing {} arguments for instruction {}",
+  525|    444|                                                (number_of_argument_required - argument_num).get(),
+  526|    444|                                                magic_enum::enum_name(opcode)));
+  527|    444|                            break;
+  528|    444|                        }
+  529|  33.3k|
+  530|  33.3k|                        current_token = tokens.at(index.get());
+  531|  33.3k|                        consume_current_token(index);
+  532|  33.3k|
+  533|  33.3k|                        // Skip commas
+  534|  33.3k|                        if (current_token.GetType() == Token::Type::Comma)
+  535|  5.34k|                        {
+  536|  5.34k|                            //PHI_LOG_DEBUG("Skipping comma");
+  537|  5.34k|                            continue;
+  538|  5.34k|                        }
+  539|  27.9k|
+  540|  27.9k|                        if (current_token.GetType() == Token::Type::NewLine)
+  541|    457|                        {
+  542|    457|                            AddParseError(program, "Unexpected end of line");
+  543|    457|                            break;
+  544|    457|                        }
+  545|  27.5k|
+  546|  27.5k|                        std::optional<InstructionArg> optional_parsed_argument =
+  547|  27.5k|                                parse_instruction_argument(current_token,
+  548|  27.5k|                                                           info.GetArgumentType(argument_num),
+  549|  27.5k|                                                           tokens, index, program);
+  550|  27.5k|                        if (!optional_parsed_argument.has_value())
+  551|  26.8k|                        {
+  552|  26.8k|                            AddParseError(program, fmt::format("Failed to parse argument number {}",
+  553|  26.8k|                                                               argument_num.get()));
+  554|  26.8k|                            break;
+  555|  26.8k|                        }
+  556|    645|
+  557|    645|                        // Successfully parsed one argument
+  558|    645|                        InstructionArg parsed_argument = optional_parsed_argument.value();
+  559|    645|
+  560|    645|                        instruction.SetArgument(argument_num, parsed_argument);
+  561|    645|                        argument_num++;
+  562|    645|
+  563|    645|                        //PHI_LOG_INFO("Successfully parsed argument {}", argument_num.get());
+  564|    645|                    }
+  565|  27.8k|
+  566|  27.8k|                    // Only add the instruction if we got no parsing errors
+  567|  27.8k|                    if (program.m_ParseErrors.empty())
+  568|     14|                    {
+  569|     14|                        //PHI_LOG_INFO("Successfully parsed instruction '{}'",
+  570|     14|                        //            instruction.DebugInfo());
+  571|     14|                        program.m_Instructions.emplace_back(instruction);
+  572|     14|                        line_has_instruction = true;
+  573|     14|                    }
+  574|  27.8k|                    break;
+  575|  27.8k|                }
+  576|  27.8k|
+  577|  27.8k|                default:
+  578|  19.6k|                    AddParseError(program, "Unexpected token");
+  579|  19.6k|                    break;
+  580|  60.0k|            }
+  581|  60.0k|        }
+  582|  2.75k|
+  583|  2.75k|        return program;
+  584|  2.75k|    }
   585|       |
   586|       |    ParsedProgram Parser::Parse(const InstructionLibrary& lib, std::string_view source)
-  587|  1.88k|    {
-  588|  1.88k|        std::vector<Token> tokens = Tokenize(source);
-  589|  1.88k|        return Parse(lib, tokens);
-  590|  1.88k|    }
+  587|  2.75k|    {
+  588|  2.75k|        std::vector<Token> tokens = Tokenize(source);
+  589|  2.75k|        return Parse(lib, tokens);
+  590|  2.75k|    }
   591|       |} // namespace dlx
 
 /home/runner/work/DLXEmu/DLXEmu/DLXEmu-App/DLXLib/src/OpCode.cpp:
@@ -4540,21 +4540,21 @@
     6|       |namespace dlx
     7|       |{
     8|       |    OpCode StringToOpCode(std::string_view token)
-    9|  14.5k|    {
-   10|  14.5k|        std::optional<OpCode> opcode_casted = magic_enum::enum_cast<OpCode>(token);
-   11|  14.5k|        if (opcode_casted.has_value())
-   12|  11.2k|        {
-   13|  11.2k|            // TODO: Bit of a hacky way around magic_enum begin able to cast every member...
-   14|  11.2k|            if (opcode_casted.value() == OpCode::NUMBER_OF_ELEMENTS)
+    9|  57.0k|    {
+   10|  57.0k|        std::optional<OpCode> opcode_casted = magic_enum::enum_cast<OpCode>(token);
+   11|  57.0k|        if (opcode_casted.has_value())
+   12|  51.8k|        {
+   13|  51.8k|            // TODO: Bit of a hacky way around magic_enum begin able to cast every member...
+   14|  51.8k|            if (opcode_casted.value() == OpCode::NUMBER_OF_ELEMENTS)
    15|      0|            {
    16|      0|                return OpCode::NONE;
    17|      0|            }
-   18|  11.2k|            return opcode_casted.value();
-   19|  11.2k|        }
-   20|  3.26k|
-   21|  3.26k|        // None found
-   22|  3.26k|        return OpCode::NONE;
-   23|  3.26k|    }
+   18|  51.8k|            return opcode_casted.value();
+   19|  51.8k|        }
+   20|  5.15k|
+   21|  5.15k|        // None found
+   22|  5.15k|        return OpCode::NONE;
+   23|  5.15k|    }
    24|       |} // namespace dlx
 
 /home/runner/work/DLXEmu/DLXEmu/DLXEmu-App/DLXLib/src/InstructionArg.cpp:
@@ -4565,12 +4565,12 @@
     5|       |    InstructionArg::InstructionArg()
     6|       |        : m_Type(ArgumentType::None)
     7|       |        , address_displacement()
-    8|  20.5k|    {}
+    8|  84.2k|    {}
     9|       |
    10|       |    ArgumentType InstructionArg::GetType() const
-   11|      0|    {
-   12|      0|        return m_Type;
-   13|      0|    }
+   11|     18|    {
+   12|     18|        return m_Type;
+   13|     18|    }
    14|       |
    15|       |    std::string InstructionArg::DebugInfo() const
    16|      0|    {
@@ -4606,11 +4606,11 @@
    46|      0|    }
    47|       |
    48|       |    const InstructionArg::Label& InstructionArg::AsLabel() const
-   49|      0|    {
-   50|      0|        PHI_ASSERT(m_Type == ArgumentType::Label);
-   51|      0|
-   52|      0|        return label;
-   53|      0|    }
+   49|      1|    {
+   50|      1|        PHI_ASSERT(m_Type == ArgumentType::Label);
+   51|      1|
+   52|      1|        return label;
+   53|      1|    }
    54|       |
    55|       |    phi::Boolean operator==(const InstructionArg& lhs, const InstructionArg& rhs)
    56|      0|    {
@@ -4651,20 +4651,20 @@
    91|      0|    }
    92|       |
    93|       |    InstructionArg ConstructInstructionArgRegisterInt(IntRegisterID id)
-   94|    236|    {
-   95|    236|        InstructionArg arg;
-   96|    236|        arg.m_Type                   = ArgumentType::IntRegister;
-   97|    236|        arg.register_int.register_id = id;
-   98|    236|        return arg;
-   99|    236|    }
+   94|    569|    {
+   95|    569|        InstructionArg arg;
+   96|    569|        arg.m_Type                   = ArgumentType::IntRegister;
+   97|    569|        arg.register_int.register_id = id;
+   98|    569|        return arg;
+   99|    569|    }
   100|       |
   101|       |    InstructionArg ConstructInstructionArgRegisterFloat(FloatRegisterID id)
-  102|     56|    {
-  103|     56|        InstructionArg arg;
-  104|     56|        arg.m_Type                     = ArgumentType::FloatRegister;
-  105|     56|        arg.register_float.register_id = id;
-  106|     56|        return arg;
-  107|     56|    }
+  102|     57|    {
+  103|     57|        InstructionArg arg;
+  104|     57|        arg.m_Type                     = ArgumentType::FloatRegister;
+  105|     57|        arg.register_float.register_id = id;
+  106|     57|        return arg;
+  107|     57|    }
   108|       |
   109|       |    InstructionArg ConstructInstructionArgImmediateValue(std::int16_t value)
   110|      2|    {
@@ -4685,11 +4685,11 @@
   125|      0|    }
   126|       |
   127|       |    InstructionArg ConstructInstructionArgLabel(std::string_view label_name)
-  128|     12|    {
-  129|     12|        InstructionArg arg;
-  130|     12|        arg.m_Type           = ArgumentType::Label;
-  131|     12|        arg.label.label_name = label_name;
-  132|     12|        return arg;
-  133|     12|    }
+  128|     17|    {
+  129|     17|        InstructionArg arg;
+  130|     17|        arg.m_Type           = ArgumentType::Label;
+  131|     17|        arg.label.label_name = label_name;
+  132|     17|        return arg;
+  133|     17|    }
   134|       |} // namespace dlx
 
