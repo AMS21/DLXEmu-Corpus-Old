@@ -472,17 +472,17 @@
    13|       |        , m_LineNumber{line_number}
    14|       |        , m_Column{column}
    15|       |        , m_Hint{hint}
-   16|  19.1k|    {}
+   16|  18.8k|    {}
    17|       |
    18|       |    Token::Type Token::GetType() const noexcept
-   19|  19.9k|    {
-   20|  19.9k|        return m_Type;
-   21|  19.9k|    }
+   19|  19.6k|    {
+   20|  19.6k|        return m_Type;
+   21|  19.6k|    }
    22|       |
    23|       |    std::string_view Token::GetTypeName() const noexcept
-   24|    318|    {
-   25|    318|        return magic_enum::enum_name(m_Type);
-   26|    318|    }
+   24|    317|    {
+   25|    317|        return magic_enum::enum_name(m_Type);
+   26|    317|    }
    27|       |
    28|       |    phi::u64 Token::GetLineNumber() const noexcept
    29|      0|    {
@@ -500,9 +500,9 @@
    41|      0|    }
    42|       |
    43|       |    std::string_view Token::GetText() const noexcept
-   44|  11.1k|    {
-   45|  11.1k|        return m_Text;
-   46|  11.1k|    }
+   44|  10.7k|    {
+   45|  10.7k|        return m_Text;
+   46|  10.7k|    }
    47|       |
    48|       |    std::string Token::GetTextString() const noexcept
    49|      0|    {
@@ -510,12 +510,12 @@
    51|      0|    }
    52|       |
    53|       |    std::uint32_t Token::GetHint() const noexcept
-   54|    434|    {
-   55|    434|        PHI_ASSERT(m_Type == Type::RegisterInt || m_Type == Type::RegisterFloat ||
-   56|    434|                   m_Type == Type::IntegerLiteral || m_Type == Type::OpCode);
+   54|    432|    {
+   55|    432|        PHI_ASSERT(m_Type == Type::RegisterInt || m_Type == Type::RegisterFloat ||
+   56|    432|                   m_Type == Type::IntegerLiteral || m_Type == Type::OpCode);
    57|       |
-   58|    434|        return m_Hint;
-   59|    434|    }
+   58|    432|        return m_Hint;
+   59|    432|    }
    60|       |
    61|       |    std::string Token::DebugInfo() const noexcept
    62|      0|    {
@@ -3108,21 +3108,21 @@
     6|       |namespace dlx
     7|       |{
     8|       |    OpCode StringToOpCode(std::string_view token) noexcept
-    9|  6.34k|    {
-   10|  6.34k|        std::optional<OpCode> opcode_casted = magic_enum::enum_cast<OpCode>(token);
-   11|  6.34k|        if (opcode_casted.has_value())
-   12|    737|        {
+    9|  6.12k|    {
+   10|  6.12k|        std::optional<OpCode> opcode_casted = magic_enum::enum_cast<OpCode>(token);
+   11|  6.12k|        if (opcode_casted.has_value())
+   12|    733|        {
    13|       |            // TODO: Bit of a hacky way around magic_enum begin able to cast every member...
-   14|    737|            if (opcode_casted.value() == OpCode::NUMBER_OF_ELEMENTS)
+   14|    733|            if (opcode_casted.value() == OpCode::NUMBER_OF_ELEMENTS)
    15|      0|            {
    16|      0|                return OpCode::NONE;
    17|      0|            }
-   18|    737|            return opcode_casted.value();
-   19|    737|        }
+   18|    733|            return opcode_casted.value();
+   19|    733|        }
    20|       |
    21|       |        // None found
-   22|  5.60k|        return OpCode::NONE;
-   23|  5.60k|    }
+   22|  5.39k|        return OpCode::NONE;
+   23|  5.39k|    }
    24|       |} // namespace dlx
 
 /home/runner/work/DLXEmu/DLXEmu/DLXEmu-App/DLXLib/src/InstructionInfo.cpp:
@@ -3445,51 +3445,51 @@
    23|       |namespace dlx
    24|       |{
    25|       |    Token ParseToken(std::string_view token, phi::u64 line_number, phi::u64 column) noexcept
-   26|  11.0k|    {
+   26|  10.8k|    {
    27|       |        // TODO: Parse the given number here directly?
-   28|  11.0k|        if (token.at(0) == '#' && token.size() > 1)
-   29|     70|        {
-   30|     70|            return Token(Token::Type::ImmediateInteger, token, line_number, column);
-   31|     70|        }
+   28|  10.8k|        if (token.at(0) == '#' && token.size() > 1)
+   29|     69|        {
+   30|     69|            return Token(Token::Type::ImmediateInteger, token, line_number, column);
+   31|     69|        }
    32|       |
-   33|  11.0k|        if (token.at(0) == '/' || token.at(0) == ';')
-   34|  1.80k|        {
-   35|  1.80k|            return Token(Token::Type::Comment, token, line_number, column);
-   36|  1.80k|        }
+   33|  10.8k|        if (token.at(0) == '/' || token.at(0) == ';')
+   34|  1.78k|        {
+   35|  1.78k|            return Token(Token::Type::Comment, token, line_number, column);
+   36|  1.78k|        }
    37|       |
-   38|  9.22k|        if (auto number = ParseNumber(token); number.has_value())
-   39|     24|        {
-   40|     24|            return Token(Token::Type::IntegerLiteral, token, line_number, column, number->get());
-   41|     24|        }
+   38|  9.02k|        if (auto number = ParseNumber(token); number.has_value())
+   39|     22|        {
+   40|     22|            return Token(Token::Type::IntegerLiteral, token, line_number, column, number->get());
+   41|     22|        }
    42|       |
-   43|  9.19k|        std::string token_upper(token.data(), token.size());
-   44|  9.19k|        std::transform(token_upper.begin(), token_upper.end(), token_upper.begin(), ::toupper);
+   43|  9.00k|        std::string token_upper(token.data(), token.size());
+   44|  9.00k|        std::transform(token_upper.begin(), token_upper.end(), token_upper.begin(), ::toupper);
    45|       |
-   46|  9.19k|        if (token_upper == "FPSR")
-   47|  4.09k|        {
-   48|  4.09k|            return Token(Token::Type::RegisterStatus, token, line_number, column);
-   49|  4.09k|        }
+   46|  9.00k|        if (token_upper == "FPSR")
+   47|  3.99k|        {
+   48|  3.99k|            return Token(Token::Type::RegisterStatus, token, line_number, column);
+   49|  3.99k|        }
    50|       |
-   51|  5.10k|        if (IntRegisterID id = StringToIntRegister(token_upper); id != IntRegisterID::None)
-   52|    435|        {
-   53|    435|            return Token(Token::Type::RegisterInt, token, line_number, column,
-   54|    435|                         static_cast<std::uint32_t>(id));
-   55|    435|        }
+   51|  5.00k|        if (IntRegisterID id = StringToIntRegister(token_upper); id != IntRegisterID::None)
+   52|    433|        {
+   53|    433|            return Token(Token::Type::RegisterInt, token, line_number, column,
+   54|    433|                         static_cast<std::uint32_t>(id));
+   55|    433|        }
    56|       |
-   57|  4.66k|        if (FloatRegisterID id = StringToFloatRegister(token_upper); id != FloatRegisterID::None)
+   57|  4.57k|        if (FloatRegisterID id = StringToFloatRegister(token_upper); id != FloatRegisterID::None)
    58|    391|        {
    59|    391|            return Token(Token::Type::RegisterFloat, token, line_number, column,
    60|    391|                         static_cast<std::uint32_t>(id));
    61|    391|        }
    62|       |
-   63|  4.27k|        if (OpCode opcode = StringToOpCode(token_upper); opcode != OpCode::NONE)
-   64|    736|        {
-   65|    736|            return Token(Token::Type::OpCode, token, line_number, column,
-   66|    736|                         static_cast<std::uint32_t>(opcode));
-   67|    736|        }
+   63|  4.18k|        if (OpCode opcode = StringToOpCode(token_upper); opcode != OpCode::NONE)
+   64|    732|        {
+   65|    732|            return Token(Token::Type::OpCode, token, line_number, column,
+   66|    732|                         static_cast<std::uint32_t>(opcode));
+   67|    732|        }
    68|       |
-   69|  3.53k|        return Token(Token::Type::LabelIdentifier, token, line_number, column);
-   70|  3.53k|    }
+   69|  3.44k|        return Token(Token::Type::LabelIdentifier, token, line_number, column);
+   70|  3.44k|    }
    71|       |
    72|       |    std::vector<Token> Parser::Tokenize(std::string_view source) noexcept
    73|    994|    {
@@ -3504,11 +3504,11 @@
    82|       |
    83|    994|        phi::Boolean parsing_comment{false};
    84|       |
-   85|  68.9k|        for (phi::usize i{0u}; i < source.length(); ++i)
-   86|  67.9k|        {
-   87|  67.9k|            const char c{source.at(i.get())};
+   85|  68.0k|        for (phi::usize i{0u}; i < source.length(); ++i)
+   86|  67.0k|        {
+   87|  67.0k|            const char c{source.at(i.get())};
    88|       |
-   89|  67.9k|            if (c == '\n')
+   89|  67.0k|            if (c == '\n')
    90|  3.51k|            {
    91|  3.51k|                if (current_token.empty())
    92|  1.15k|                {
@@ -3523,44 +3523,44 @@
   101|  1.15k|                }
   102|       |
   103|       |                // Otherwise a new line separates tokens
-  104|  2.36k|                tokens.emplace_back(
-  105|  2.36k|                        ParseToken(source.substr(token_begin.get(), current_token.length()),
-  106|  2.36k|                                   current_line_number, current_column - current_token.length()));
+  104|  2.35k|                tokens.emplace_back(
+  105|  2.35k|                        ParseToken(source.substr(token_begin.get(), current_token.length()),
+  106|  2.35k|                                   current_line_number, current_column - current_token.length()));
   107|       |
-  108|  2.36k|                token_begin = i;
+  108|  2.35k|                token_begin = i;
   109|       |
-  110|  2.36k|                tokens.emplace_back(Token::Type::NewLine, source.substr(token_begin.get(), 1),
-  111|  2.36k|                                    current_line_number, current_column - 1u);
+  110|  2.35k|                tokens.emplace_back(Token::Type::NewLine, source.substr(token_begin.get(), 1),
+  111|  2.35k|                                    current_line_number, current_column - 1u);
   112|       |
-  113|  2.36k|                current_token   = std::string_view{};
-  114|  2.36k|                parsing_comment = false;
-  115|  2.36k|                current_line_number += 1u;
-  116|  2.36k|                current_column = 0u;
-  117|  2.36k|            }
+  113|  2.35k|                current_token   = std::string_view{};
+  114|  2.35k|                parsing_comment = false;
+  115|  2.35k|                current_line_number += 1u;
+  116|  2.35k|                current_column = 0u;
+  117|  2.35k|            }
   118|       |            // Comments begin with an '/' or ';' and after that the entire line is treated as part of the comment
-  119|  64.4k|            else if (c == '/' || c == ';')
-  120|  1.84k|            {
-  121|  1.84k|                if (current_token.empty())
-  122|  1.80k|                {
-  123|  1.80k|                    token_begin = i;
-  124|  1.80k|                }
+  119|  63.5k|            else if (c == '/' || c == ';')
+  120|  1.82k|            {
+  121|  1.82k|                if (current_token.empty())
+  122|  1.78k|                {
+  123|  1.78k|                    token_begin = i;
+  124|  1.78k|                }
   125|       |
-  126|  1.84k|                parsing_comment = true;
-  127|  1.84k|                current_token   = std::string_view(
-  128|  1.84k|                        source.substr(token_begin.get(), current_token.length() + 1));
-  129|  1.84k|            }
-  130|  62.5k|            else if (parsing_comment)
-  131|  8.09k|            {
+  126|  1.82k|                parsing_comment = true;
+  127|  1.82k|                current_token   = std::string_view(
+  128|  1.82k|                        source.substr(token_begin.get(), current_token.length() + 1));
+  129|  1.82k|            }
+  130|  61.6k|            else if (parsing_comment)
+  131|  7.93k|            {
   132|       |                // simply append the character
-  133|  8.09k|                current_token = std::string_view(
-  134|  8.09k|                        source.substr(token_begin.get(), current_token.length() + 1));
-  135|  8.09k|            }
-  136|  54.4k|            else
-  137|  54.4k|            {
+  133|  7.93k|                current_token = std::string_view(
+  134|  7.93k|                        source.substr(token_begin.get(), current_token.length() + 1));
+  135|  7.93k|            }
+  136|  53.7k|            else
+  137|  53.7k|            {
   138|       |                // Not parsing a comment
   139|       |
-  140|  54.4k|                switch (c)
-  141|  54.4k|                {
+  140|  53.7k|                switch (c)
+  141|  53.7k|                {
   142|  1.84k|                    case ' ':
   143|  1.84k|                    case '\t':
   144|  1.84k|                    case '\v':
@@ -3577,101 +3577,101 @@
   155|  1.84k|                                current_line_number, current_column - current_token.length()));
   156|  1.84k|                        current_token = std::string_view{};
   157|  1.84k|                        break;
-  158|  2.03k|                    case ':':
+  158|  1.91k|                    case ':':
   159|       |                        // Need to parse label names together with their colon
-  160|  2.03k|                        if (!current_token.empty())
-  161|  2.02k|                        {
-  162|  2.02k|                            current_token = std::string_view(
-  163|  2.02k|                                    source.substr(token_begin.get(), current_token.length() + 1));
-  164|  2.02k|                            tokens.emplace_back(ParseToken(
-  165|  2.02k|                                    source.substr(token_begin.get(), current_token.length()),
-  166|  2.02k|                                    current_line_number,
-  167|  2.02k|                                    current_column + 1u - current_token.length()));
+  160|  1.91k|                        if (!current_token.empty())
+  161|  1.90k|                        {
+  162|  1.90k|                            current_token = std::string_view(
+  163|  1.90k|                                    source.substr(token_begin.get(), current_token.length() + 1));
+  164|  1.90k|                            tokens.emplace_back(ParseToken(
+  165|  1.90k|                                    source.substr(token_begin.get(), current_token.length()),
+  166|  1.90k|                                    current_line_number,
+  167|  1.90k|                                    current_column + 1u - current_token.length()));
   168|       |
-  169|  2.02k|                            current_token = std::string_view{};
-  170|  2.02k|                        }
-  171|     10|                        else
-  172|     10|                        {
+  169|  1.90k|                            current_token = std::string_view{};
+  170|  1.90k|                        }
+  171|      8|                        else
+  172|      8|                        {
   173|       |                            // Orphan colon
-  174|     10|                            token_begin = i;
+  174|      8|                            token_begin = i;
   175|       |
-  176|     10|                            tokens.emplace_back(Token::Type::Colon,
-  177|     10|                                                source.substr(token_begin.get(), 1),
-  178|     10|                                                current_line_number, current_column);
-  179|     10|                        }
-  180|  2.03k|                        break;
-  181|  4.13k|                    case ',':
-  182|  4.13k|                    case '(':
-  183|  4.54k|                    case ')':
-  184|  4.54k|                        if (!current_token.empty())
-  185|  4.48k|                        {
-  186|  4.48k|                            tokens.emplace_back(ParseToken(
-  187|  4.48k|                                    source.substr(token_begin.get(), current_token.length()),
-  188|  4.48k|                                    current_line_number, current_column - current_token.length()));
+  176|      8|                            tokens.emplace_back(Token::Type::Colon,
+  177|      8|                                                source.substr(token_begin.get(), 1),
+  178|      8|                                                current_line_number, current_column);
+  179|      8|                        }
+  180|  1.91k|                        break;
+  181|  4.03k|                    case ',':
+  182|  4.03k|                    case '(':
+  183|  4.45k|                    case ')':
+  184|  4.45k|                        if (!current_token.empty())
+  185|  4.40k|                        {
+  186|  4.40k|                            tokens.emplace_back(ParseToken(
+  187|  4.40k|                                    source.substr(token_begin.get(), current_token.length()),
+  188|  4.40k|                                    current_line_number, current_column - current_token.length()));
   189|       |
-  190|  4.48k|                            current_token = std::string_view{};
-  191|  4.48k|                        }
+  190|  4.40k|                            current_token = std::string_view{};
+  191|  4.40k|                        }
   192|       |
-  193|  4.54k|                        Token::Type type;
-  194|  4.54k|                        switch (c)
-  195|  4.54k|                        {
-  196|  4.13k|                            case ',':
-  197|  4.13k|                                type = Token::Type::Comma;
-  198|  4.13k|                                break;
-  199|      8|                            case '(':
-  200|      8|                                type = Token::Type::OpenBracket;
-  201|      8|                                break;
-  202|    407|                            case ')':
-  203|    407|                                type = Token::Type::ClosingBracket;
-  204|    407|                                break;
+  193|  4.45k|                        Token::Type type;
+  194|  4.45k|                        switch (c)
+  195|  4.45k|                        {
+  196|  4.03k|                            case ',':
+  197|  4.03k|                                type = Token::Type::Comma;
+  198|  4.03k|                                break;
+  199|      7|                            case '(':
+  200|      7|                                type = Token::Type::OpenBracket;
+  201|      7|                                break;
+  202|    421|                            case ')':
+  203|    421|                                type = Token::Type::ClosingBracket;
+  204|    421|                                break;
   205|      0|                            default:
   206|      0|                                PHI_ASSERT_NOT_REACHED();
   207|      0|                                break;
-  208|  4.54k|                        }
+  208|  4.45k|                        }
   209|       |
-  210|  4.54k|                        token_begin = i;
+  210|  4.45k|                        token_begin = i;
   211|       |
-  212|  4.54k|                        tokens.emplace_back(type, source.substr(token_begin.get(), 1),
-  213|  4.54k|                                            current_line_number, current_column);
-  214|  4.54k|                        break;
+  212|  4.45k|                        tokens.emplace_back(type, source.substr(token_begin.get(), 1),
+  213|  4.45k|                                            current_line_number, current_column);
+  214|  4.45k|                        break;
   215|       |
-  216|  46.0k|                    default:
-  217|  46.0k|                        if (current_token.empty())
-  218|  9.29k|                        {
-  219|  9.29k|                            token_begin = i;
-  220|  9.29k|                        }
+  216|  45.5k|                    default:
+  217|  45.5k|                        if (current_token.empty())
+  218|  9.09k|                        {
+  219|  9.09k|                            token_begin = i;
+  220|  9.09k|                        }
   221|       |
   222|       |                        // simply append the character
-  223|  46.0k|                        current_token = std::string_view(
-  224|  46.0k|                                source.substr(token_begin.get(), current_token.length() + 1));
-  225|  54.4k|                }
-  226|  54.4k|            }
+  223|  45.5k|                        current_token = std::string_view(
+  224|  45.5k|                                source.substr(token_begin.get(), current_token.length() + 1));
+  225|  53.7k|                }
+  226|  53.7k|            }
   227|       |
-  228|  67.9k|            current_column += 1u;
-  229|  66.7k|        }
+  228|  67.0k|            current_column += 1u;
+  229|  65.8k|        }
   230|       |
   231|       |        // Checked the entire string. Parse whats left if anything
   232|    994|        if (!current_token.empty())
-  233|    370|        {
-  234|    370|            tokens.emplace_back(ParseToken(source.substr(token_begin.get(), current_token.length()),
-  235|    370|                                           current_line_number,
-  236|    370|                                           current_column - current_token.length()));
-  237|    370|        }
+  233|    369|        {
+  234|    369|            tokens.emplace_back(ParseToken(source.substr(token_begin.get(), current_token.length()),
+  235|    369|                                           current_line_number,
+  236|    369|                                           current_column - current_token.length()));
+  237|    369|        }
   238|       |
   239|    994|        return tokens;
   240|    994|    }
   241|       |
   242|       |    static phi::Boolean has_x_more_tokens(const std::vector<Token>& tokens, phi::usize index,
   243|       |                                          phi::u64 x) noexcept
-  244|    477|    {
-  245|    477|        return index + x <= tokens.size();
-  246|    477|    }
+  244|    474|    {
+  245|    474|        return index + x <= tokens.size();
+  246|    474|    }
   247|       |
   248|       |    static phi::Boolean has_one_more_token(const std::vector<Token>& tokens,
   249|       |                                           phi::usize                index) noexcept
-  250|    475|    {
-  251|    475|        return has_x_more_tokens(tokens, index, 1u);
-  252|    475|    }
+  250|    471|    {
+  251|    471|        return has_x_more_tokens(tokens, index, 1u);
+  252|    471|    }
   253|       |
   254|       |    static phi::Boolean next_token_is(const std::vector<Token>& tokens, phi::usize index,
   255|       |                                      Token::Type token_type) noexcept
@@ -3696,27 +3696,27 @@
   274|      0|    }
   275|       |
   276|       |    static void AddParseError(ParsedProgram& program, const std::string& message) noexcept
-  277|  11.7k|    {
-  278|  11.7k|        ParseError err;
-  279|  11.7k|        err.message = message;
+  277|  11.5k|    {
+  278|  11.5k|        ParseError err;
+  279|  11.5k|        err.message = message;
   280|       |
   281|       |        //PHI_LOG_ERROR("Parsing error: {}", message);
   282|       |
-  283|  11.7k|        program.m_ParseErrors.emplace_back(err);
-  284|  11.7k|    }
+  283|  11.5k|        program.m_ParseErrors.emplace_back(err);
+  284|  11.5k|    }
   285|       |
   286|       |    static std::optional<InstructionArg> parse_instruction_argument(
   287|       |            const Token& token, ArgumentType expected_argument_type,
   288|       |            const std::vector<Token>& tokens, phi::usize& index, ParsedProgram& program) noexcept
-  289|    403|    {
+  289|    405|    {
   290|       |        // PHI_LOG_INFO("Parsing argument with token '{}' and expected type '{}'", token.DebugInfo(),
   291|       |        //              magic_enum::enum_name(expected_argument_type));
   292|       |
-  293|    403|        switch (token.GetType())
-  294|    403|        {
-  295|      2|            case Token::Type::IntegerLiteral: {
-  296|      2|                if (!ArgumentTypeIncludes(expected_argument_type,
-  297|      2|                                          ArgumentType::AddressDisplacement))
+  293|    405|        switch (token.GetType())
+  294|    405|        {
+  295|      3|            case Token::Type::IntegerLiteral: {
+  296|      3|                if (!ArgumentTypeIncludes(expected_argument_type,
+  297|      3|                                          ArgumentType::AddressDisplacement))
   298|      0|                {
   299|      0|                    AddParseError(program,
   300|      0|                                  fmt::format("Expected {} but got address displacement",
@@ -3725,21 +3725,21 @@
   303|      0|                }
   304|       |
   305|       |                // Parse address displacement
-  306|      2|                auto displacement_value = ParseNumber(token.GetText());
-  307|      2|                if (!displacement_value)
+  306|      3|                auto displacement_value = ParseNumber(token.GetText());
+  307|      3|                if (!displacement_value)
   308|      0|                {
   309|      0|                    AddParseError(program,
   310|      0|                                  "Failed to parse displacement value for Address displacement");
   311|      0|                    return {};
   312|      0|                }
-  313|      2|                std::int16_t value = displacement_value.value().get();
+  313|      3|                std::int16_t value = displacement_value.value().get();
   314|       |
-  315|      2|                if (!has_x_more_tokens(tokens, index, 3u))
-  316|      2|                {
-  317|      2|                    AddParseError(program,
-  318|      2|                                  "Not enough arguments left to parse address displacement");
-  319|      2|                    return {};
-  320|      2|                }
+  315|      3|                if (!has_x_more_tokens(tokens, index, 3u))
+  316|      3|                {
+  317|      3|                    AddParseError(program,
+  318|      3|                                  "Not enough arguments left to parse address displacement");
+  319|      3|                    return {};
+  320|      3|                }
   321|       |
   322|      0|                const Token& first_token  = tokens.at(index.get());
   323|      0|                const Token& second_token = tokens.at((index + 1u).get());
@@ -3802,31 +3802,31 @@
   380|      0|                return ConstructInstructionArgRegisterFloat(
   381|      0|                        static_cast<FloatRegisterID>(token.GetHint()));
   382|      0|            }
-  383|     56|            case Token::Type::RegisterStatus: {
-  384|     56|            }
-  385|     76|            case Token::Type::LabelIdentifier: {
+  383|     57|            case Token::Type::RegisterStatus: {
+  384|     57|            }
+  385|     78|            case Token::Type::LabelIdentifier: {
   386|       |                // Parse as Label
-  387|     76|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::Label))
-  388|     65|                {
-  389|     65|                    AddParseError(program,
-  390|     65|                                  fmt::format("Got Label but expected '{}'",
-  391|     65|                                              magic_enum::enum_name(expected_argument_type)));
-  392|     65|                    return {};
-  393|     65|                }
+  387|     78|                if (!ArgumentTypeIncludes(expected_argument_type, ArgumentType::Label))
+  388|     66|                {
+  389|     66|                    AddParseError(program,
+  390|     66|                                  fmt::format("Got Label but expected '{}'",
+  391|     66|                                              magic_enum::enum_name(expected_argument_type)));
+  392|     66|                    return {};
+  393|     66|                }
   394|       |
-  395|     11|                if (IsReservedIdentifier(token.GetText()))
+  395|     12|                if (IsReservedIdentifier(token.GetText()))
   396|      1|                {
   397|      1|                    AddParseError(program, fmt::format("Cannot used reserved identifier {}",
   398|      1|                                                       token.GetText()));
   399|      1|                    return {};
   400|      1|                }
   401|       |
-  402|     10|                if (!IsValidIdentifier(token.GetText()))
-  403|      9|                {
-  404|      9|                    AddParseError(program, fmt::format("Invalid label identifier found {}",
-  405|      9|                                                       token.GetText()));
-  406|      9|                    return {};
-  407|      9|                }
+  402|     11|                if (!IsValidIdentifier(token.GetText()))
+  403|     10|                {
+  404|     10|                    AddParseError(program, fmt::format("Invalid label identifier found {}",
+  405|     10|                                                       token.GetText()));
+  406|     10|                    return {};
+  407|     10|                }
   408|       |
   409|       |                //PHI_LOG_INFO("Parsed Label identifier as '{}'", token.GetText());
   410|       |
@@ -3852,22 +3852,22 @@
   430|       |
   431|      0|                return ConstructInstructionArgImmediateValue(parsed_value.value().get());
   432|      0|            }
-  433|    318|            default:
-  434|    318|                AddParseError(program,
-  435|    318|                              fmt::format("Unexpected token of type '{}'", token.GetTypeName()));
-  436|    318|                return {};
-  437|    403|        }
-  438|    403|    }
+  433|    317|            default:
+  434|    317|                AddParseError(program,
+  435|    317|                              fmt::format("Unexpected token of type '{}'", token.GetTypeName()));
+  436|    317|                return {};
+  437|    405|        }
+  438|    405|    }
   439|       |
   440|       |    static void consume_x_tokens(phi::usize& index, phi::usize x) noexcept
-  441|  19.1k|    {
-  442|  19.1k|        index += x;
-  443|  19.1k|    }
+  441|  18.8k|    {
+  442|  18.8k|        index += x;
+  443|  18.8k|    }
   444|       |
   445|       |    static void consume_current_token(phi::usize& index) noexcept
-  446|  19.1k|    {
-  447|  19.1k|        consume_x_tokens(index, 1u);
-  448|  19.1k|    }
+  446|  18.8k|    {
+  447|  18.8k|        consume_x_tokens(index, 1u);
+  448|  18.8k|    }
   449|       |
   450|       |    ParsedProgram Parser::Parse(const InstructionLibrary& lib, std::vector<Token>& tokens) noexcept
   451|    994|    {
@@ -3877,39 +3877,39 @@
   455|       |
   456|    994|        phi::Boolean line_has_instruction{false};
   457|       |
-  458|  19.7k|        for (phi::usize index{0u}; index < tokens.size();)
-  459|  18.7k|        {
-  460|  18.7k|            Token& current_token = tokens.at(index.get());
+  458|  19.4k|        for (phi::usize index{0u}; index < tokens.size();)
+  459|  18.4k|        {
+  460|  18.4k|            Token& current_token = tokens.at(index.get());
   461|       |
-  462|  18.7k|            consume_current_token(index);
+  462|  18.4k|            consume_current_token(index);
   463|       |
   464|       |            //PHI_LOG_INFO("Parsing '{}'", current_token.DebugInfo());
   465|       |
-  466|  18.7k|            switch (current_token.GetType())
-  467|  18.7k|            {
+  466|  18.4k|            switch (current_token.GetType())
+  467|  18.4k|            {
   468|       |                // Ignore comments
-  469|  1.78k|                case Token::Type::Comment:
+  469|  1.77k|                case Token::Type::Comment:
   470|       |                    //PHI_LOG_DEBUG("Ignoring comment");
-  471|  1.78k|                    break;
+  471|  1.77k|                    break;
   472|  3.51k|                case Token::Type::NewLine:
   473|       |                    //PHI_LOG_DEBUG("Ignoring newline");
   474|  3.51k|                    line_has_instruction = false;
   475|  3.51k|                    break;
-  476|  3.51k|                case Token::Type::LabelIdentifier: {
-  477|  3.51k|                    if (line_has_instruction)
-  478|      1|                    {
-  479|      1|                        AddParseError(program, "Expected new line but got label identifer");
-  480|      1|                        break;
-  481|      1|                    }
+  476|  3.42k|                case Token::Type::LabelIdentifier: {
+  477|  3.42k|                    if (line_has_instruction)
+  478|      2|                    {
+  479|      2|                        AddParseError(program, "Expected new line but got label identifer");
+  480|      2|                        break;
+  481|      2|                    }
   482|       |
   483|       |                    // Handle jump labels
   484|       |                    // Check if the last character of the identifier is a colon
-  485|  3.51k|                    if (current_token.GetText().at(current_token.GetText().size() - 1) == ':')
-  486|  2.05k|                    {
-  487|  2.05k|                        std::string_view label_name = current_token.GetText().substr(
-  488|  2.05k|                                0, current_token.GetText().size() - 1);
+  485|  3.42k|                    if (current_token.GetText().at(current_token.GetText().size() - 1) == ':')
+  486|  1.93k|                    {
+  487|  1.93k|                        std::string_view label_name = current_token.GetText().substr(
+  488|  1.93k|                                0, current_token.GetText().size() - 1);
   489|       |
-  490|  2.05k|                        if (IsReservedIdentifier(label_name))
+  490|  1.93k|                        if (IsReservedIdentifier(label_name))
   491|      1|                        {
   492|      1|                            AddParseError(
   493|      1|                                    program,
@@ -3918,86 +3918,86 @@
   496|      1|                            break;
   497|      1|                        }
   498|       |
-  499|  2.05k|                        program.m_JumpData[label_name] =
-  500|  2.05k|                                static_cast<std::uint32_t>(program.m_Instructions.size());
+  499|  1.93k|                        program.m_JumpData[label_name] =
+  500|  1.93k|                                static_cast<std::uint32_t>(program.m_Instructions.size());
   501|       |
   502|       |                        //PHI_LOG_INFO("Added jump label {} -> {}", label_name,
   503|       |                        //             program.m_Instructions.size());
-  504|  2.05k|                    }
-  505|  1.46k|                    else
-  506|  1.46k|                    {
-  507|  1.46k|                        AddParseError(program, "Label identifier is missing a colon");
-  508|  1.46k|                    }
+  504|  1.93k|                    }
+  505|  1.49k|                    else
+  506|  1.49k|                    {
+  507|  1.49k|                        AddParseError(program, "Label identifier is missing a colon");
+  508|  1.49k|                    }
   509|       |
-  510|  3.51k|                    break;
-  511|  3.51k|                }
-  512|  3.51k|                case Token::Type::OpCode: {
-  513|    434|                    if (line_has_instruction)
-  514|      1|                    {
-  515|      1|                        AddParseError(program, "Expected new line but got op code");
-  516|      1|                        break;
-  517|      1|                    }
+  510|  3.42k|                    break;
+  511|  3.42k|                }
+  512|  3.42k|                case Token::Type::OpCode: {
+  513|    431|                    if (line_has_instruction)
+  514|      0|                    {
+  515|      0|                        AddParseError(program, "Expected new line but got op code");
+  516|      0|                        break;
+  517|      0|                    }
   518|       |
   519|       |                    // Handle normal instructions
-  520|    433|                    OpCode opcode = static_cast<OpCode>(current_token.GetHint());
+  520|    431|                    OpCode opcode = static_cast<OpCode>(current_token.GetHint());
   521|       |
   522|       |                    //PHI_LOG_INFO("Instruction opcode: {}", magic_enum::enum_name(opcode));
   523|       |
-  524|    433|                    const InstructionInfo& info = lib.LookUp(opcode);
+  524|    431|                    const InstructionInfo& info = lib.LookUp(opcode);
   525|       |
   526|       |                    // Make sure we got no problems here
-  527|    433|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
-  528|    433|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
-  529|    433|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
-  530|    433|                    PHI_ASSERT(info.GetExecutor());
+  527|    431|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
+  528|    431|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
+  529|    431|                    PHI_ASSERT(info.GetArgumentType(0_u8) != ArgumentType::Unknown);
+  530|    431|                    PHI_ASSERT(info.GetExecutor());
   531|       |
-  532|    433|                    phi::u8 number_of_argument_required = info.GetNumberOfRequiredArguments();
+  532|    431|                    phi::u8 number_of_argument_required = info.GetNumberOfRequiredArguments();
   533|       |                    //PHI_LOG_INFO("Instruction requires {} arguments",
   534|       |                    //             number_of_argument_required.get());
   535|       |
   536|       |                    // Create instruction
-  537|    433|                    Instruction instruction(info);
+  537|    431|                    Instruction instruction(info);
   538|       |
   539|       |                    // Parse arguments
-  540|    480|                    for (phi::u8 argument_num{0_u8}; argument_num < number_of_argument_required;)
-  541|    475|                    {
+  540|    476|                    for (phi::u8 argument_num{0_u8}; argument_num < number_of_argument_required;)
+  541|    471|                    {
   542|       |                        // Get next token
-  543|    475|                        if (!has_one_more_token(tokens, index))
-  544|     25|                        {
-  545|     25|                            AddParseError(
-  546|     25|                                    program,
-  547|     25|                                    fmt::format("Missing {} arguments for instruction {}",
-  548|     25|                                                (number_of_argument_required - argument_num).get(),
-  549|     25|                                                magic_enum::enum_name(opcode)));
-  550|     25|                            break;
-  551|     25|                        }
+  543|    471|                        if (!has_one_more_token(tokens, index))
+  544|     21|                        {
+  545|     21|                            AddParseError(
+  546|     21|                                    program,
+  547|     21|                                    fmt::format("Missing {} arguments for instruction {}",
+  548|     21|                                                (number_of_argument_required - argument_num).get(),
+  549|     21|                                                magic_enum::enum_name(opcode)));
+  550|     21|                            break;
+  551|     21|                        }
   552|       |
   553|    450|                        current_token = tokens.at(index.get());
   554|    450|                        consume_current_token(index);
   555|       |
   556|       |                        // Skip commas
   557|    450|                        if (current_token.GetType() == Token::Type::Comma)
-  558|     45|                        {
+  558|     43|                        {
   559|       |                            //PHI_LOG_DEBUG("Skipping comma");
-  560|     45|                            continue;
-  561|     45|                        }
+  560|     43|                            continue;
+  561|     43|                        }
   562|       |
-  563|    405|                        if (current_token.GetType() == Token::Type::NewLine)
+  563|    407|                        if (current_token.GetType() == Token::Type::NewLine)
   564|      2|                        {
   565|      2|                            AddParseError(program, "Unexpected end of line");
   566|      2|                            break;
   567|      2|                        }
   568|       |
-  569|    403|                        std::optional<InstructionArg> optional_parsed_argument =
-  570|    403|                                parse_instruction_argument(current_token,
-  571|    403|                                                           info.GetArgumentType(argument_num),
-  572|    403|                                                           tokens, index, program);
-  573|    403|                        if (!optional_parsed_argument.has_value())
-  574|    401|                        {
-  575|    401|                            AddParseError(program, fmt::format("Failed to parse argument number {}",
-  576|    401|                                                               argument_num.get()));
-  577|    401|                            break;
-  578|    401|                        }
+  569|    405|                        std::optional<InstructionArg> optional_parsed_argument =
+  570|    405|                                parse_instruction_argument(current_token,
+  571|    405|                                                           info.GetArgumentType(argument_num),
+  572|    405|                                                           tokens, index, program);
+  573|    405|                        if (!optional_parsed_argument.has_value())
+  574|    403|                        {
+  575|    403|                            AddParseError(program, fmt::format("Failed to parse argument number {}",
+  576|    403|                                                               argument_num.get()));
+  577|    403|                            break;
+  578|    403|                        }
   579|       |
   580|       |                        // Successfully parsed one argument
   581|      2|                        InstructionArg parsed_argument = optional_parsed_argument.value();
@@ -4009,21 +4009,21 @@
   587|      2|                    }
   588|       |
   589|       |                    // Only add the instruction if we got no parsing errors
-  590|    433|                    if (program.m_ParseErrors.empty())
+  590|    431|                    if (program.m_ParseErrors.empty())
   591|      5|                    {
   592|       |                        //PHI_LOG_INFO("Successfully parsed instruction '{}'",
   593|       |                        //            instruction.DebugInfo());
   594|      5|                        program.m_Instructions.emplace_back(instruction);
   595|      5|                        line_has_instruction = true;
   596|      5|                    }
-  597|    433|                    break;
-  598|    433|                }
+  597|    431|                    break;
+  598|    431|                }
   599|       |
-  600|  9.46k|                default:
-  601|  9.46k|                    AddParseError(program, "Unexpected token");
-  602|  9.46k|                    break;
-  603|  18.7k|            }
-  604|  18.7k|        }
+  600|  9.26k|                default:
+  601|  9.26k|                    AddParseError(program, "Unexpected token");
+  602|  9.26k|                    break;
+  603|  18.4k|            }
+  604|  18.4k|        }
   605|       |
   606|    994|        return program;
   607|    994|    }
@@ -4500,7 +4500,7 @@
     5|       |    InstructionArg::InstructionArg() noexcept
     6|       |        : m_Type(ArgumentType::None)
     7|       |        , address_displacement()
-    8|  1.30k|    {}
+    8|  1.29k|    {}
     9|       |
    10|       |    ArgumentType InstructionArg::GetType() const noexcept
    11|      9|    {
@@ -4671,22 +4671,22 @@
    39|       |                                 {"F30", FloatRegisterID::F30}, {"F31", FloatRegisterID::F31}}};
    40|       |
    41|       |    IntRegisterID StringToIntRegister(std::string_view token) noexcept
-   42|  7.16k|    {
-   43|  7.16k|        static constexpr auto map =
-   44|  7.16k|                LookUpMap<std::string_view, IntRegisterID, IntRegisterValues.size()>(
-   45|  7.16k|                        IntRegisterValues, IntRegisterID::None);
+   42|  6.95k|    {
+   43|  6.95k|        static constexpr auto map =
+   44|  6.95k|                LookUpMap<std::string_view, IntRegisterID, IntRegisterValues.size()>(
+   45|  6.95k|                        IntRegisterValues, IntRegisterID::None);
    46|       |
-   47|  7.16k|        return map.at(token);
-   48|  7.16k|    }
+   47|  6.95k|        return map.at(token);
+   48|  6.95k|    }
    49|       |
    50|       |    FloatRegisterID StringToFloatRegister(std::string_view token) noexcept
-   51|  6.73k|    {
-   52|  6.73k|        static constexpr auto map =
-   53|  6.73k|                LookUpMap<std::string_view, FloatRegisterID, FloatRegisterValues.size()>(
-   54|  6.73k|                        FloatRegisterValues, FloatRegisterID::None);
+   51|  6.51k|    {
+   52|  6.51k|        static constexpr auto map =
+   53|  6.51k|                LookUpMap<std::string_view, FloatRegisterID, FloatRegisterValues.size()>(
+   54|  6.51k|                        FloatRegisterValues, FloatRegisterID::None);
    55|       |
-   56|  6.73k|        return map.at(token);
-   57|  6.73k|    }
+   56|  6.51k|        return map.at(token);
+   57|  6.51k|    }
    58|       |} // namespace dlx
 
 /home/runner/work/DLXEmu/DLXEmu/DLXEmu-App/DLXLib/src/FloatRegister.cpp:
@@ -4715,7 +4715,7 @@
     7|       |{
     8|       |    Instruction::Instruction(const InstructionInfo& info) noexcept
     9|       |        : m_Info(info)
-   10|    433|    {}
+   10|    431|    {}
    11|       |
    12|       |    void Instruction::SetArgument(phi::u8 argument_number, InstructionArg argument) noexcept
    13|      2|    {
